@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learnése Mandarin Scenes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout idea: two puzzle cards (ask, answer) in mixed difficulty. Tap tiles into order, check, then switch to another way of saying it. */
+:root{
+  --bg:#F3F1EF; --card:#FFFFFF; --ink:#211B19; --mute:#6C625E; --line:#E3DDD8; --accent:#A83423; --gold:#C98E22;
+  --who:#3D5A8A; --when:#7A4FA0; --where:#2F6B5B; --with:#A8730F; --act:#3E7A35; --obj:#A83423; --link:#6C625E; --ask:#B0457A;
+  --ok:#2E7D4F; --no:#B5602A;
+  --display:"Sora","Noto Sans SC",system-ui,sans-serif; --body:"Noto Sans SC",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151211; --card:#211C1A; --ink:#F1EBE7; --mute:#A9A09B; --line:#3A3330; --accent:#E2654F; --gold:#E2AC4A;
+  --who:#8FAEE6; --when:#C3A0E6; --where:#7FC7B0; --with:#E6B95E; --act:#93CF83; --obj:#F08C78; --link:#B3AAA5; --ask:#EC93BE;
+  --ok:#7BD39B; --no:#F0A26C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151211; --card:#211C1A; --ink:#F1EBE7; --mute:#A9A09B; --line:#3A3330; --accent:#E2654F; --gold:#E2AC4A;
+  --who:#8FAEE6; --when:#C3A0E6; --where:#7FC7B0; --with:#E6B95E; --act:#93CF83; --obj:#F08C78; --link:#B3AAA5; --ask:#EC93BE;
+  --ok:#7BD39B; --no:#F0A26C; color-scheme:dark}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.45}
+button,select{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:680px;margin:0 auto;padding:16px 16px 56px;display:grid;gap:14px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.brand a{color:inherit;text-decoration:none}
+.brand{font-family:var(--display);font-size:11px;letter-spacing:.16em;color:var(--accent);font-weight:700}
+.ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 10px;font-size:12.5px;display:flex;align-items:center;gap:8px}
+.chip select{border:0;background:none;font-weight:600;cursor:pointer}
+.chip label{display:flex;gap:3px;align-items:center;cursor:pointer}
+h1{font-family:var(--display);font-size:clamp(23px,6vw,30px);line-height:1.15;text-wrap:balance}
+h1 span{display:block;font-family:var(--body);font-size:16px;font-weight:500;color:var(--mute);margin-top:4px}
+.how{font-size:14px;color:var(--mute)}
+.topics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.topic{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px;display:grid;gap:2px;opacity:.6;text-align:left;cursor:default}
+.topic.open{opacity:1;cursor:pointer}
+.view{display:grid;gap:14px}.view[hidden]{display:none}
+.back{color:var(--mute);font-size:14px;text-decoration:none}
+.search{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;font-size:15px}
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.scard{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:16px;display:grid;gap:8px;text-decoration:none;color:inherit}
+.scard:hover{border-color:var(--accent)}
+.scard .em{font-size:30px}
+.scard h3{font-family:var(--display);font-size:18px}
+.scard p{font-size:14px;color:var(--mute)}
+.scard ul{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.scard li{font-size:12px;border-radius:999px;padding:2px 8px;background:var(--bg);color:var(--mute)}
+.scard li.open{background:color-mix(in srgb,var(--accent) 12%,var(--card));color:var(--accent);font-weight:600}
+.scard.soon{border-style:dashed;opacity:.7}
+.empty{color:var(--mute);font-size:14px}
+.results{display:grid;gap:8px}.results:empty{display:none}
+.rh{font-family:var(--display);font-size:13px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase;margin-top:4px}
+.ritem{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;display:grid;gap:2px}
+.ritem:hover,.rword:hover{border-color:var(--accent)}
+.rzh{font-size:17px;font-weight:700}.ren{font-size:14px}.rtag{font-size:12px;color:var(--mute)}
+.rwords{display:flex;flex-wrap:wrap;gap:6px}
+.rword{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;cursor:pointer;text-align:left;font-size:14px}
+.rword b{font-size:17px}.rword small{display:block;font-size:11.5px;color:var(--mute)}
+.contact{display:flex;gap:6px;flex-wrap:wrap}
+.contact a{text-decoration:none}
+.topic.on{opacity:1;border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.topic .n{font-family:var(--display);font-size:11px;color:var(--mute)}
+.topic .l{font-size:13px;font-weight:600;line-height:1.25}
+.topic .s{font-size:11px;color:var(--mute)}
+.topic.on .s{color:var(--accent);font-weight:600}
+.now{font-size:17px;border-left:4px solid var(--accent);padding-left:10px}
+.now b{font-family:var(--display)}
+.bank{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;gap:8px}
+.bank .bh{font-size:14px}.bank .bh span{color:var(--mute);font-size:12.5px}
+.bwords{display:flex;flex-wrap:wrap;gap:6px}
+.bw{border-radius:10px;padding:5px 9px;background:var(--bg);font-size:13px;line-height:1.3}
+.bw b{font-size:16px}.bw small{display:block;font-size:11px;color:var(--mute)}
+.bw.new{background:color-mix(in srgb,var(--gold) 18%,var(--card))}.bw i{font-style:normal;color:var(--gold);font-weight:700}
+@media (max-width:420px){.topics{grid-template-columns:repeat(2,1fr)}}
+.legend{display:flex;flex-wrap:wrap;gap:4px;font-size:11.5px}
+.roles{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.roles summary{cursor:pointer;list-style:none;display:grid;gap:6px}
+.roles summary::-webkit-details-marker{display:none}
+.roles .what{font-size:13px;color:var(--accent);font-weight:600}
+.roles .what::before{content:"▸ "}.roles[open] .what::before{content:"▾ "}
+.rbody{display:grid;gap:10px;margin-top:10px;font-size:14px}
+.order{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px}
+.order span{border-radius:6px;padding:2px 7px;font-weight:700;color:#fff;background:var(--c)}
+.order i{font-style:normal;color:var(--mute)}
+.ex b{font-size:19px;color:var(--c);margin-right:3px}
+.exen{font-size:13px;color:var(--mute)}
+#rlist{list-style:none;display:grid;gap:6px}
+#rlist li{display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:baseline}
+#rlist span{font-weight:700;font-size:12.5px;color:var(--c)}
+#rlist small{color:var(--mute)}
+.tip{background:var(--bg);border-radius:10px;padding:8px 10px}
+.legend span{border-radius:6px;padding:2px 7px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 13%,var(--card))}
+
+.part{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.part h2{font-family:var(--display);font-size:19px}
+.part .count{font-size:13px;color:var(--mute)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px}
+.card.done{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}
+.chead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--mute);font-family:var(--display)}
+.en{font-size:17px;font-weight:600;margin-top:2px}
+.swap{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:5px 9px;font-size:12.5px;cursor:pointer;text-align:center;line-height:1.2}
+.hbtns{display:flex;flex-direction:column;gap:6px;flex:none}
+.swap small{display:block;color:var(--mute);font-size:11px}
+.line{min-height:62px;border:2px dashed var(--line);border-radius:12px;padding:6px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.line .ph{color:var(--mute);font-size:13px;padding-left:4px}
+.card.done .line{border-style:solid;border-color:var(--ok)}
+.pool{display:flex;flex-wrap:wrap;gap:5px;min-height:20px}
+.note{font-size:12.5px;color:var(--mute)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 12px;font-size:14px;cursor:pointer}
+.btn.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.next{background:var(--ink);border-color:var(--ink);color:var(--card);font-weight:600}
+.btn.sm{padding:5px 10px;font-size:13px}
+
+.fb{border-radius:12px;padding:10px 12px;display:grid;gap:6px;font-size:14px}
+.fb.ok{background:color-mix(in srgb,var(--ok) 13%,var(--card))}
+.fb.no{background:color-mix(in srgb,var(--no) 13%,var(--card))}
+.fb .v{font-family:var(--display);font-weight:700;font-size:16px}
+.fb.ok .v{color:var(--ok)}.fb.no .v{color:var(--no)}
+.fb .zh{font-size:19px;font-weight:700}
+.fb .py{color:var(--mute);font-size:14px}
+.fb .me{font-size:14px;font-style:italic}
+.fb .lvl{font-size:14px}
+.fb .lvl b{color:var(--gold)}
+.fb .why b{color:var(--accent)}
+.ex3{display:grid;gap:8px;border-top:1px solid color-mix(in srgb,var(--ok) 30%,transparent);padding-top:8px}
+.ex3>div{display:grid;gap:1px;font-size:14px}
+.ex3 span{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+.ex3 .pat{font-size:16px}
+
+.tile{border:0;border-radius:9px;padding:4px 9px 5px;cursor:pointer;text-align:center;line-height:1.15;background:color-mix(in srgb,var(--c) 13%,var(--card));box-shadow:inset 0 3px 0 var(--c);touch-action:manipulation}
+.tile .z{display:block;font-size:19px;font-weight:700;color:var(--c)}
+.tile .p{display:block;font-size:10.5px;color:var(--mute)}
+.tile .e{display:block;font-size:10px;color:var(--mute);opacity:.85}
+.nopy .tile .p,.nopy .fb .py{display:none}
+.noen .tile .e,.noen .fb .me{display:none}
+.nozh .tile .z,.nozh .fb .zh{display:none}
+.nozh .tile .p{font-size:16px;font-weight:700;color:var(--c)}
+.nozh .fb .py{font-size:18px;color:var(--ink);font-weight:600}
+
+footer{font-size:12.5px;color:var(--mute);text-align:center;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:9px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.r-who{--c:var(--who)}.r-when{--c:var(--when)}.r-where{--c:var(--where)}.r-with{--c:var(--with)}.r-act{--c:var(--act)}.r-obj{--c:var(--obj)}.r-link{--c:var(--link)}.r-ask{--c:var(--ask)}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><a href="#">LEARNÉSE · MANDARIN SCENES</a></div>
+    <div class="ctl">
+      <div class="chip">Show
+        <label><input type="checkbox" id="szh" checked> 汉字</label>
+        <label><input type="checkbox" id="spy" checked> pinyin</label>
+        <label><input type="checkbox" id="sen" checked> English</label></div>
+    </div>
+  </div>
+
+  <section id="home" class="view" hidden>
+    <h1>Mandarin Scenes<span>Real situations, one chapter at a time. Build each sentence yourself and see how Chinese word order works.</span></h1>
+    <input class="search" id="search" type="search" placeholder="Search a word or sentence: party, bring, 带, 室友, dai" aria-label="Search scenes">
+    <div class="results" id="results"></div>
+    <div class="scenes" id="scenes"></div>
+  </section>
+
+  <section id="scene" class="view" hidden>
+  <a class="back" href="#">← All scenes</a>
+  <h1 id="sTitle"></h1>
+  <div class="topics" id="chapters" aria-label="Chapters"></div>
+  <div class="now" id="now"></div>
+  <p class="how">Tap the tiles into the right order, then check. Some are easy, some are tricky. Try as many ways as you like.</p>
+  <details class="roles">
+    <summary><span class="legend" id="legend"></span><span class="what">What do the colours mean?</span></summary>
+    <div class="rbody">
+      <ul id="rlist"></ul>
+      <p class="tip">Different sentence patterns put these jobs in different orders. When you get a sentence right, look at the colours in your answer and read why it's built that way.</p>
+    </div>
+  </details>
+
+  <div class="part"><h2>Ask it</h2><span class="count" id="cAsk"></span></div>
+  <div id="ask"></div>
+
+  <div class="part"><h2>Answer it</h2><span class="count" id="cAns"></span></div>
+  <div id="ans"></div>
+  </section>
+
+  <footer>Real tasks, real places, real conversations.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- words: zh → [pinyin, role, English] ---------- */
+const D={
+ '你':['nǐ','who','you'],'我':['wǒ','who','I'],'他':['tā','who','he'],'她':['tā','who','she'],'它':['tā','who','it'],'你们':['nǐmen','who','you all'],
+ '周六':['zhōuliù','when','Saturday'],'晚':['wǎn','when','late'],'一点':['yìdiǎn','when','a bit'],
+ '在':['zài','where','be in'],'堪培拉':['Kānpéilā','where','Canberra'],'那边':['nàbiān','where','your side'],
+ '和':['hé','with','with / and'],'一起':['yìqǐ','with','together'],
+ '带':['dài','act','bring'],'来':['lái','act','come'],'是':['shì','act','is'],'打算':['dǎsuàn','act','plan to'],'问':['wèn','act','ask'],'会':['huì','act','will'],
+ '喜欢':['xǐhuan','act','like'],'好':['hǎo','act','nice'],'能':['néng','act','may'],'可以':['kěyǐ','act','can'],'有':['yǒu','act','there is'],'到':['dào','act','arrive'],
+ '不知道':['bù zhīdào','act','not sure'],'方不方便':['fāng bu fāngbiàn','act','is it OK'],
+ '朋友':['péngyou','obj','friend'],'派对':['pàiduì','obj','party'],'人':['rén','obj','person'],'家人':['jiārén','obj','family'],
+ '的':['de','link',"'s"],'方便':['fāngbiàn','link','convenient'],'一下':['yíxià','link','a moment'],'因为':['yīnwèi','link','because'],'很':['hěn','link','very'],
+ '特别':['tèbié','link','really'],'而且':['érqiě','link','and also'],'一定':['yídìng','link','definitely'],'不好意思':['bù hǎoyìsi','link','excuse me'],
+ '多':['duō','link','extra'],'一个':['yí ge','link','one'],'一个人':['yí ge rén','link','alone'],'个':['ge','link','(measure word)'],'难得':['nándé','link','rare chance'],
+ '也':['yě','link','also'],'就':['jiù','link','so'],'给':['gěi','link','to / for'],'被':['bèi','link','by'],'得':['de','link','(-ly)'],
+ '不过':['búguò','link','but'],'可能':['kěnéng','link','maybe'],'不':['bù','link','not'],'还':['hái','link','else'],'除了':['chúle','link','besides'],
+ '大概':['dàgài','link','roughly'],'请问':['qǐngwèn','link','may I ask'],
+ '谁':['shéi','ask','who?'],'吗':['ma','ask','? (yes/no)'],'呢':['ne','ask','and you?'],'几':['jǐ','ask','how many?'],'会不会':['huì bu huì','ask','will or won\'t']};
+const ROLES=[['who','Who'],['when','When'],['where','Where'],['with','With'],['act','Action'],['obj','Thing / person'],['link','Linking'],['ask','Question']];
+// people from the group: [zh, pinyin, English, who added it, pronoun, is a person]
+const NOUNS1=[ // words from the community: [zh, pinyin, English, who shared it, pronoun, person?, measure, 吃/喝, alcohol, date added]
+ ['室友','shìyǒu','roommate','Cheryl','他',1,'','','','2026-11-08'],['表妹','biǎomèi','younger cousin','Cheryl','她',1,'','','','2026-11-08'],['同事','tóngshì','colleague','Cheryl','她',1,'','','','2026-11-08']];
+
+/* ---------- puzzles ----------
+ t: the sentence (N = person from the group, P = 他/她/它 for them; ，。？：are shown, not tiles)
+ alts: other correct orders · extra: one tile that doesn't belong (HSK 2+) · hint: if wrong · why: when right */
+const ASK1=[
+ {lv:1,en:'Who are you bringing?',t:['你','带','谁','来','？'],
+  hint:'Start with who does it (你), then the action. 谁 stays where the answer would go. It doesn\'t jump to the front like "who" in English.',
+  why:'<b>带</b> = bring. You\'re the guest, so who\'s your plus-one?'},
+ {lv:1,en:'Who are you coming with?',t:['你','和','谁','来','？'],alts:[['谁','和','你','来','？']],
+  hint:'和 + person sits before the action 来.',why:'<b>和</b> = with. "With who" (和谁) goes <b>before</b> the action 来: 你 + 和谁 + 来. In English, "with who" comes last.'},
+ {lv:1,en:'Are you bringing a friend?',t:['你','带','朋友','来','吗','？'],
+  hint:'Say it like a normal sentence, then put 吗 at the very end.',why:'Any sentence + <b>吗</b> = a yes/no question. The word order doesn\'t change.'},
+
+ {lv:2,en:'Who\'s coming with you?',t:['谁','和','你','一起','来','？'],alts:[['你','和','谁','一起','来','？']],extra:'给',
+  hint:'一起 (together) goes right before the action 来, never at the end.',why:'Putting <b>谁</b> first puts the spotlight on the other person.'},
+ {lv:2,en:'Are you bringing a friend too?',t:['你','也','带','朋友','来','吗','？'],extra:'被',
+  hint:'也 (also) goes after the person and before the action.',why:'<b>也</b> always sits before the action: 你也带…, never 也你带….'},
+ {lv:2,en:'How many people are you bringing?',t:['你','带','几','个','人','来','？'],extra:'给',
+  hint:'Number word + 个 + 人: 几个人 stays together as one block.',why:'<b>几个人</b> = how many people. 几 takes the place of the number in the answer.'},
+
+ {lv:3,en:'The one you\'re bringing is…?',t:['你','带','来','的','是','谁','？'],alts:[['你','带','的','是','谁','？']],extra:'和',
+  hint:'First "what you bring" (你带来的), then 是, then the question word.',why:'<b>…的是</b> points at it, like a drum roll: "The one you\'re bringing is…?"'},
+ {lv:3,en:'Who are you bringing on Saturday?',t:['你','周六','带','谁','来','？'],alts:[['周六','你','带','谁','来','？']],extra:'在',
+  hint:'"When" goes before the action: right after 你, or at the very start. Never at the end.',why:'Chinese always says <b>when</b> before <b>what you do</b>.'},
+ {lv:3,en:'Who\'s the friend you\'re bringing?',t:['你','带','的','朋友','是','谁','？'],alts:[['谁','是','你','带','的','朋友','？']],extra:'给',
+  hint:'"The friend you bring" = 你带的朋友. The description goes before 朋友, joined by 的.',why:'<b>的</b> lets a whole phrase describe a noun: 你带的 + 朋友.'},
+
+ {lv:4,en:'Who are you planning to bring?',t:['你','打算','带','谁','来','？'],extra:'被',
+  hint:'打算 (plan to) goes right before the thing you plan to do.',why:'<b>打算</b> makes it sound like the party is still a while away.'},
+ {lv:4,en:'Will you bring a friend or not?',t:['你','会不会','带','朋友','来','？'],extra:'吗',
+  hint:'会不会 already makes it a question, so you don\'t need 吗.',why:'<b>A不A</b> (会不会) is another way to ask yes or no. Don\'t add 吗 on top.'},
+ {lv:4,en:'Besides you, who else is coming?',t:['除了','你','，','还','有','谁','来','？'],extra:'给',
+  hint:'除了 + person first, then 还有 + the question.',why:'<b>除了 A，还有…</b> = besides A, who else…'},
+
+ {lv:5,en:'May I ask, will you be bringing a friend?',t:['方便','问','一下','，','你','会','带','朋友','来','吗','？'],extra:'谁',
+  hint:'Open with the polite part (方便问一下), then ask. 吗 goes at the very end.',why:'<b>方便问一下</b> softens it, the way a polite host checks numbers.'},
+ {lv:5,en:'Roughly how many people are coming from your side?',t:['你','那边','大概','几','个','人','来','？'],extra:'吗',
+  hint:'Who (你那边), then 大概 (roughly), then how many, then the action.',why:'<b>你那边</b> = your side, your group. <b>大概</b> makes it a relaxed estimate.'},
+ {lv:5,en:'May I ask, will you bring family?',t:['请问','，','你','会','带','家人','来','吗','？'],extra:'得',
+  hint:'请问 opens the question politely. The rest is a normal 吗 question.',why:'<b>请问</b> = "may I ask". A simple way to sound polite with someone you don\'t know.'}
+];
+const ANS1=[
+ {lv:1,en:'I\'m bringing my ___.',t:['我','带','N','来','。'],
+  hint:'Copy the question: 你带谁来？ Swap 你 for 我, and 谁 for your person. Nothing else moves.',why:'Same shape as the question. <b>你 → 我</b>, <b>谁 → your person</b>.'},
+ {lv:1,en:'I\'m coming with my ___.',t:['我','和','N','来','。'],alts:[['N','和','我','来','。']],
+  hint:'和 + person comes before the action 来.',why:'<b>和</b> instead of 带: you arrive together.'},
+ {lv:1,en:'I\'m bringing my ___.',t:['我','带','我','的','N','来','。'],alts:[['我','带','N','来','。']],
+  hint:'我的 + person stays together, between 带 and 来.',why:'<b>我的</b> = my. It always comes right before the person.'},
+
+ {lv:2,en:'I\'m coming with my ___. And you?',t:['我','和','N','一起','来','。','你','呢','？'],alts:[['N','和','我','一起','来','。','你','呢','？']],extra:'吗',
+  hint:'一起 goes before 来. Then 你呢 is a tiny question of its own at the end.',why:'<b>你呢？</b> throws the question back. The easiest way to keep a chat going.'},
+ {lv:2,en:'My ___ and I are coming together.',t:['N','和','我','一起','来','。'],alts:[['我','和','N','一起','来','。']],extra:'给',
+  hint:'Person 和 person, then 一起, then the action.',why:'Put your person first and they become the star of the sentence.'},
+ {lv:2,en:'I\'m bringing my ___ too.',t:['我','也','带','N','来','。'],extra:'被',
+  hint:'也 goes after 我 and before the action.',why:'<b>也</b> sits before the action, even when "too" comes last in English.'},
+
+ {lv:3,en:'I\'m bringing my ___ on Saturday, because they love parties.',t:['我','周六','带','N','来','，','因为','P','很','喜欢','派对','。'],alts:[['周六','我','带','N','来','，','因为','P','很','喜欢','派对','。']],extra:'的',
+  hint:'"When" goes before the action. The 因为 (because) part comes after.',why:'<b>When</b> before the action, <b>因为</b> adds the why. 他 / 她 / 它 changes with the person you swap in.'},
+ {lv:3,en:'What I\'m bringing is… my ___!',t:['我','带','来','的','是','我','的','N','。'],alts:[['我','带','的','是','我','的','N','。']],extra:'和',
+  hint:'"What I bring" (我带来的) first, then 是, then the answer.',why:'Builds suspense, like a reveal: "What I\'m bringing is…"'},
+ {lv:3,people:1,en:'I\'m bringing my ___ and their friend.',t:['我','带','N','和','P','的','朋友','来','。'],extra:'给',
+  hint:'Both people go between 带 and 来. "Their friend" = 他的朋友 / 她的朋友.',why:'<b>和</b> joins the two people, <b>的</b> shows whose friend it is.'},
+
+ {lv:4,people:1,en:'I\'m bringing my ___. They\'re really nice, and you\'ll definitely like them.',t:['我','带','我','的','N','来','。','P','人','特别','好','，','而且','你们','一定','会','喜欢','P','。'],
+  hint:'Three parts: who you bring, what they\'re like, then 而且 + what will happen. Keep talking about the same person.',why:'Stay on one person (<b>他 / 她</b>) and link ideas with <b>而且</b>.'},
+ {lv:4,en:'I\'ll bring my ___, but they might arrive a bit late.',t:['我','会','带','N','来','，','不过','P','可能','会','晚','一点','到','。'],extra:'被',
+  hint:'不过 (but) starts the second half. 可能 + 会 go before the action 到.',why:'<b>不过</b> is a softer "but". <b>晚一点到</b> = arrive a bit late.'},
+ {lv:4,en:'I won\'t bring anyone. I\'m coming alone.',t:['我','不','带','朋友','来','，','我','一个人','来','。'],alts:[['我','一个人','来','，','我','不','带','朋友','来','。']],extra:'给',
+  hint:'不 goes right before the action it cancels. 一个人 (alone) goes before 来.',why:'<b>一个人来</b> = come alone. Like 一起, it sits before the action.'},
+
+ {lv:5,en:'Sorry, could I bring one extra friend?',t:['不好意思','，','我','能','多','带','一个','朋友','吗','？'],extra:'谁',
+  hint:'Polite opener first. 多 (extra) goes right before 带.',why:'<b>不好意思</b> + asking first. <b>多带一个</b> = bring one extra.'},
+ {lv:5,people:1,en:'It\'s rare that my ___ is in Canberra too, so I\'ll bring them.',t:['难得','N','也','在','堪培拉','，','我','就','带','P','来','。'],extra:'给',
+  hint:'难得 opens the sentence. 就 links it to what you\'ll do.',why:'<b>难得</b> = it\'s a rare chance. <b>就</b> = so (then).'},
+ {lv:5,en:'Could I bring my ___? Not sure if that\'s OK.',t:['我','可以','带','我','的','N','来','吗','？','不知道','方不方便','？'],extra:'被',
+  hint:'Ask first (…吗？), then add 不知道方不方便 to soften it.',why:'<b>不知道方不方便</b> leaves the host room to say no. Very polite.'}
+];
+
+/* ===== Chapters 2–4 =====
+ Extra tokens: M = 一 + the item's measure word · C = a colour · V = 吃 or 喝 for that food · G = 好吃 / 好喝 */
+Object.assign(D,{
+ '什么':['shénme','ask','what?'],'哪儿':['nǎr','ask','where?'],'多少钱':['duōshao qián','ask','how much?'],'什么时候':['shénme shíhou','ask','when?'],
+ '怎么样':['zěnmeyàng','ask','how about it?'],'哪件':['nǎ jiàn','ask','which one?'],'还是':['háishi','ask','or (in questions)'],'有没有':['yǒu méiyǒu','ask','is there any?'],
+ '贵不贵':['guì bu guì','ask','pricey or not?'],'会不会':['huì bu huì','ask','will or won\'t'],'喜不喜欢':['xǐ bu xǐhuan','ask','like or not'],'喝不喝':['hē bu hē','ask','drink or not?'],
+ '东西':['dōngxi','obj','thing'],'钱':['qián','obj','money'],'衣服':['yīfu','obj','clothes'],'颜色':['yánsè','obj','colour'],'着装要求':['zhuózhuāng yāoqiú','obj','dress code'],
+ '茶':['chá','obj','tea'],'咖啡':['kāfēi','obj','coffee'],'酒':['jiǔ','obj','alcohol'],'辣':['là','obj','spicy food'],'花生':['huāshēng','obj','peanuts'],'水果':['shuǐguǒ','obj','fruit'],
+ '外卖':['wàimài','obj','takeaway'],'吃的':['chī de','obj','food'],'喝的':['hē de','obj','drinks'],'口味':['kǒuwèi','obj','taste'],'大家':['dàjiā','who','everyone'],'我们':['wǒmen','who','we'],
+ '超市':['chāoshì','where','supermarket'],'网上':['wǎngshang','where','online'],'中国超市':['Zhōngguó chāoshì','where','Asian grocer'],'家':['jiā','where','home'],
+ '周末':['zhōumò','when','weekend'],'已经':['yǐjīng','when','already'],
+ '买':['mǎi','act','buy'],'去':['qù','act','go'],'花':['huā','act','spend'],'用':['yòng','act','use'],'穿':['chuān','act','wear'],'吃':['chī','act','eat'],'喝':['hē','act','drink'],
+ '做':['zuò','act','make'],'点':['diǎn','act','order'],'需要':['xūyào','act','need'],'觉得':['juéde','act','think'],'适合':['shìhé','act','suit'],'挑':['tiāo','act','pick'],
+ '准备':['zhǔnbèi','act','prepare'],'安排':['ānpái','act','arrange'],'过敏':['guòmǐn','act','be allergic'],'看':['kàn','act','think / see'],'聚一聚':['jù yi jù','act','get together'],
+ '穿着':['chuānzhe','act','wearing it'],'能':['néng','act','can'],'是':['shì','act','is'],
+ '贵':['guì','act','pricey'],'便宜':['piányi','act','cheap'],'好看':['hǎokàn','act','looks good'],'舒服':['shūfu','act','comfy'],'冷':['lěng','act','cold'],
+ '正式':['zhèngshì','act','formal'],'随便':['suíbiàn','act','casual'],'新':['xīn','act','new'],'旧':['jiù','act','old'],'好吃':['hǎochī','act','tasty'],'好喝':['hǎohē','act','tasty'],
+ '行':['xíng','act','OK'],'没问题':['méi wèntí','act','no problem'],'没关系':['méi guānxi','act','it\'s fine'],
+ '给':['gěi','with','for / to'],'对':['duì','with','to (towards)'],'这件':['zhè jiàn','who','this one'],'那件':['nà jiàn','who','that one'],
+ '比较':['bǐjiào','link','fairly'],'有点':['yǒudiǎn','link','a bit'],'一点':['yìdiǎn','link','a bit'],'得':['de','link','(how it\'s done)'],'太':['tài','link','too'],
+ '都':['dōu','link','all'],'不太':['bú tài','link','not really'],'自己':['zìjǐ','link','myself'],'还':['hái','link','also'],'一些':['yìxiē','link','some'],
+ '虽然':['suīrán','link','although'],'但是':['dànshì','link','but'],'反而':['fǎn\'ér','link','instead'],'与其':['yǔqí','link','rather than'],'不如':['bùrú','link','might as well'],
+ '就是':['jiùshì','link','it\'s just that'],'什么都':['shénme dōu','link','anything'],'最':['zuì','link','most'],'多':['duō','link','extra'],'需要我':['xūyào wǒ','link','need me to'],
+ '本来':['běnlái','link','originally'],'这样':['zhèyàng','link','like this'],'过':['guò','link','(ever done)'],
+ '红色':['hóngsè','obj','red'],'黑色':['hēisè','obj','black'],'白色':['báisè','obj','white'],'绿色':['lǜsè','obj','green'],'蓝色':['lánsè','obj','blue'],'黄色':['huángsè','obj','yellow']
+});
+Object.assign(D,{'外套':['wàitào','obj','jacket'],'衬衫':['chènshān','obj','shirt'],'裙子':['qúnzi','obj','skirt'],'裤子':['kùzi','obj','trousers']});
+const COLOURS=[['红色','red'],['黑色','black'],['白色','white'],['绿色','green'],['蓝色','blue'],['黄色','yellow']];
+const MWPY={'个':'yí ge','束':'yí shù','瓶':'yì píng','盒':'yì hé','盆':'yì pén','副':'yí fù','件':'yí jiàn','条':'yì tiáo','顶':'yì dǐng','双':'yì shuāng','套':'yí tào','盘':'yì pán','杯':'yì bēi'};
+Object.keys(MWPY).forEach(k=>{D['一'+k]=D['一'+k]||[MWPY[k],'link','one (measure word)'];D['这'+k]=D['这'+k]||['zhè '+MWPY[k].split(' ')[1],'who','this one']});
+
+// [zh, pinyin, English, who added it, pronoun, person?, measure word, 吃/喝]
+const NOUNS2=[['鲜花','xiānhuā','flowers','Cheryl','它',0,'束','','','2026-11-08'],['红酒','hóngjiǔ','red wine','Cheryl','它',0,'瓶','','','2026-11-08'],['桌游','zhuōyóu','board game','Cheryl','它',0,'个','','','2026-11-08']];
+const NOUNS3=[['外套','wàitào','jacket','Cheryl','它',0,'件','','','2026-11-08'],['衬衫','chènshān','shirt','Cheryl','它',0,'件','','','2026-11-08'],['裙子','qúnzi','skirt','Cheryl','它',0,'条','','','2026-11-08']];
+const NOUNS4=[['饺子','jiǎozi','dumplings','Cheryl','它',0,'盘','吃','','2026-11-08'],['春卷','chūnjuǎn','spring rolls','Cheryl','它',0,'盘','吃','','2026-11-08'],['奶茶','nǎichá','bubble tea','Cheryl','它',0,'杯','喝','','2026-11-08']];
+
+/* ---- Chapter 2: what are you bringing? (no 礼物 / 送: those belong to Mandarin Marathon) ---- */
+const ASK2=[
+ {lv:1,en:'What are you bringing?',t:['你','带','什么','来','？'],hint:'什么 stays where the answer would go, between 带 and 来.',why:'Same shape as 你带谁来？ Just swap <b>谁</b> for <b>什么</b>.'},
+ {lv:1,en:'Are you bringing anything?',t:['你','带','东西','来','吗','？'],hint:'Make a normal sentence, then put 吗 at the end.',why:'<b>东西</b> = thing, stuff. Handy when you don\'t know the word.'},
+ {lv:1,en:'What are you buying?',t:['你','买','什么','？'],hint:'Who, then the action, then 什么.',why:'<b>买</b> = buy. 什么 sits where the thing would go.'},
+ {lv:2,en:'Where are you buying it?',t:['你','在','哪儿','买','？'],extra:'给',hint:'在 + place comes before the action 买.',why:'<b>Where</b> goes before the action: 在哪儿 + 买.'},
+ {lv:2,en:'Is it pricey?',t:['东西','贵不贵','？'],extra:'吗',hint:'贵不贵 already asks the question, so no 吗.',why:'<b>A不A</b> (贵不贵) asks yes or no without 吗.'},
+ {lv:2,en:'When are you going to buy it?',t:['你','什么时候','去','买','？'],extra:'在',hint:'When comes before the action. 去买 = go and buy.',why:'Two actions in a row: <b>去</b> + <b>买</b>, in the order they happen.'},
+ {lv:3,en:'Who are you bringing it for?',t:['你','给','谁','带','东西','？'],extra:'和',hint:'给 + person comes before the action 带.',why:'<b>给</b> + person = for someone. It sits before the action.'},
+ {lv:3,en:'How much are you planning to spend?',t:['你','打算','花','多少钱','？'],extra:'给',hint:'打算 goes right before what you plan to do.',why:'<b>花</b> = spend (money). <b>多少钱</b> = how much.'},
+ {lv:3,en:'What\'s the thing you\'re bringing?',t:['你','带','来','的','东西','是','什么','？'],alts:[['你','带','的','东西','是','什么','？']],extra:'和',hint:'"The thing you bring" = 你带来的东西. Then 是什么.',why:'<b>的</b> lets a whole phrase describe 东西.'},
+ {lv:4,en:'What do you think would be good to bring?',t:['你','觉得','带','什么','比较','好','？'],extra:'给',hint:'你觉得 first, then the idea: 带什么比较好.',why:'<b>觉得</b> + a whole idea. <b>比较好</b> = better, more suitable.'},
+ {lv:4,en:'Did you buy it online?',t:['你','是','在','网上','买','的','吗','？'],extra:'给',hint:'是 … 的 wraps around how or where it happened.',why:'<b>是…的</b> focuses on <b>where</b> it was bought.'},
+ {lv:4,en:'Shall we buy it together?',t:['我们','一起','买','，','怎么样','？'],extra:'吗',hint:'Make the suggestion first, then add 怎么样 at the end.',why:'<b>…，怎么样？</b> turns any idea into a friendly suggestion.'},
+ {lv:5,en:'May I ask, do you need me to bring anything?',t:['请问','，','需要我','带','什么','吗','？'],extra:'给',hint:'请问 first. 需要我 + action asks if you\'re needed.',why:'<b>需要我带什么吗</b> = do you need me to bring anything. Polite offer.'},
+ {lv:5,en:'The thing you\'re bringing, can everyone use it?',t:['你','带','的','东西','，','大家','都','能','用','吗','？'],extra:'给',hint:'Put the thing first as the topic, then ask about it.',why:'<b>Topic first</b>: name the thing, then say something about it.'},
+ {lv:5,en:'Is there anything we can\'t bring?',t:['有没有','什么','不','能','带','的','？'],extra:'给',hint:'有没有 starts it. 不能带的 = the things we can\'t bring.',why:'<b>有没有</b> + <b>…的</b>: "is there anything that…"'}
+];
+const ANS2=[
+ {lv:1,en:'I\'m bringing ___.',t:['我','带','N','来','。'],hint:'Copy the question: 你带什么来？ Swap 你 for 我, 什么 for your thing.',why:'Same shape as the question. <b>什么 → your thing</b>.'},
+ {lv:1,en:'I\'m bringing ___ (count it with a measure word).',t:['我','带','M','N','来','。'],hint:'Number + measure word go right before the thing.',why:'Every thing has its measure word: one bottle, one box, one pot…'},
+ {lv:1,en:'I\'m buying ___.',t:['我','买','N','。'],hint:'Who, action, thing.',why:'The simplest Chinese sentence: <b>who + action + thing</b>.'},
+ {lv:2,en:'I\'m buying ___ at the supermarket.',t:['我','在','超市','买','N','。'],extra:'给',hint:'在 + place comes before the action.',why:'English says the place last. Chinese says it <b>before</b> the action.'},
+ {lv:2,en:'The ___ isn\'t pricey. It\'s cheap.',t:['N','不','贵','，','很','便宜','。'],extra:'吗',hint:'Start with the thing, then describe it.',why:'Thing first, then what it\'s like. No 是 needed before 贵 or 便宜.'},
+ {lv:2,en:'Let\'s buy ___ together. How about it?',t:['我们','一起','买','N','，','怎么样','？'],extra:'给',hint:'一起 goes before 买. 怎么样 comes last.',why:'<b>一起</b> before the action, <b>怎么样</b> at the end.'},
+ {lv:3,en:'I\'m bringing ___ for everyone (with a measure word).',t:['我','给','大家','带','M','N','。'],extra:'和',hint:'给 + who it\'s for comes before 带.',why:'<b>给大家</b> = for everyone, placed before the action.'},
+ {lv:3,en:'What I\'m bringing is… ___!',t:['我','带','来','的','是','N','。'],alts:[['我','带','的','是','N','。']],extra:'和',hint:'"What I bring" (我带来的) first, then 是, then the reveal.',why:'Builds suspense, like a reveal.'},
+ {lv:3,en:'I\'m planning to bring ___, because everyone likes it.',t:['我','打算','带','N','，','因为','大家','都','喜欢','。'],extra:'给',hint:'打算 before 带. In the 因为 part, 都 comes after 大家.',why:'<b>都</b> always comes after the people it covers: 大家都….'},
+ {lv:4,en:'I think bringing ___ is better, and it\'s not pricey.',t:['我','觉得','带','N','比较','好','，','而且','不','贵','。'],extra:'给',hint:'我觉得 + idea, then 而且 adds one more point.',why:'<b>而且</b> adds a second reason on top of the first.'},
+ {lv:4,en:'I bought the ___ online.',t:['N','我','是','在','网上','买','的','。'],alts:[['我','是','在','网上','买','的','N','。']],extra:'给',hint:'Thing first as the topic, then 是 … 的 around where you bought it.',why:'<b>是…的</b> highlights where. Starting with the thing makes it the topic.'},
+ {lv:4,en:'I\'m bringing ___, but it isn\'t new.',t:['我','带','N','，','不过','不','是','新','的','。'],extra:'给',hint:'不过 starts the second half. 不是新的 = not a new one.',why:'<b>不过</b> is a soft "but". <b>新的</b> = a new one.'},
+ {lv:5,en:'It\'s rare that we all get together, so I\'ll bring ___.',t:['难得','大家','聚一聚','，','我','就','带','M','N','来','。'],extra:'给',hint:'难得 opens it. 就 links to what you\'ll do.',why:'<b>难得…就…</b> = since it\'s a rare chance, I\'ll….'},
+ {lv:5,en:'I picked the ___ myself. Not sure if everyone will like it.',t:['N','是','我','自己','挑','的','，','不知道','大家','喜不喜欢','。'],extra:'吗',hint:'Thing first, then 是我自己挑的. Then 不知道 + an A不A question.',why:'<b>不知道 + 喜不喜欢</b> = not sure whether… A soft, humble touch.'},
+ {lv:5,en:'Rather than buying a new one, I might as well bring the ___ from home.',t:['与其','买','新','的','，','不如','带','我','家','的','N','。'],extra:'给',hint:'与其 + the option you drop, then 不如 + the better one.',why:'<b>与其 A，不如 B</b> = rather than A, might as well B.'}
+];
+
+/* ---- Chapter 3: what to wear ---- */
+const ASK3=[
+ {lv:1,en:'What are you wearing?',t:['你','穿','什么','？'],hint:'Who, then 穿, then 什么.',why:'<b>穿</b> = wear. 什么 sits where the clothes would go.'},
+ {lv:1,en:'What colour are you wearing?',t:['你','穿','什么','颜色','？'],hint:'什么颜色 stays together as one block.',why:'<b>什么 + noun</b> = which kind of…'},
+ {lv:1,en:'Are you wearing a jacket?',t:['你','穿','外套','吗','？'],hint:'A normal sentence, then 吗 at the end.',why:'Any sentence + <b>吗</b> = a yes/no question.'},
+ {lv:2,en:'I\'m wearing this one. Does it look good?',t:['我','穿','这件','，','好看','吗','？'],extra:'给',hint:'Say what you\'re wearing first, then ask 好看吗.',why:'<b>这件</b> = this one (clothes use 件).'},
+ {lv:2,en:'Are you wearing red or black?',t:['你','穿','红色','还是','黑色','？'],extra:'吗',hint:'还是 already asks "or?", so no 吗.',why:'<b>还是</b> = or, in questions. Don\'t add 吗.'},
+ {lv:2,en:'What do you think I should wear?',t:['你','觉得','我','穿','什么','好','？'],extra:'给',hint:'你觉得 first, then the idea 我穿什么好.',why:'<b>…什么好？</b> = what would be good to…'},
+ {lv:3,en:'Do we need to dress formally?',t:['要','穿','得','很','正式','吗','？'],extra:'给',hint:'穿得 + how: 穿得很正式.',why:'<b>得</b> links an action to how it\'s done: 穿得正式 = dress formally.'},
+ {lv:3,en:'Which one are you planning to wear?',t:['你','打算','穿','哪件','？'],extra:'吗',hint:'打算 before 穿. 哪件 goes where the answer would.',why:'<b>哪件</b> = which one (of clothes).'},
+ {lv:3,en:'Does the party have a dress code?',t:['派对','有没有','着装要求','？'],extra:'吗',hint:'有没有 already asks, so no 吗.',why:'<b>有没有</b> = is there or isn\'t there.'},
+ {lv:4,en:'Does this outfit suit the party?',t:['这件','衣服','适合','派对','吗','？'],extra:'给',hint:'适合 takes the thing directly, no "for".',why:'<b>适合派对</b> = suits the party. No extra word for "for".'},
+ {lv:4,en:'Are you going in a skirt or trousers?',t:['你','穿','裙子','去','还是','穿','裤子','去','？'],extra:'吗',hint:'Repeat 穿 … 去 on both sides of 还是.',why:'<b>穿…去</b> = go wearing…. Both choices keep the same shape.'},
+ {lv:4,en:'Where did you buy that shirt?',t:['你','那件','衬衫','是','在','哪儿','买','的','？'],extra:'吗',hint:'是 … 的 wraps around where it happened.',why:'<b>是…的</b> asks about a detail of something already done.'},
+ {lv:5,en:'Is it OK to dress a bit casually?',t:['穿','得','随便','一点','，','可以','吗','？'],extra:'给',hint:'穿得 + how + 一点, then ask 可以吗.',why:'<b>随便一点</b> = a bit more casual.'},
+ {lv:5,en:'Would dressing like this be too formal?',t:['这样','穿','会不会','太','正式','？'],extra:'吗',hint:'这样穿 is the topic. 会不会 already asks.',why:'<b>这样穿</b> = dressing like this, used as the topic.'},
+ {lv:5,en:'Is there a dress code, or can we wear anything?',t:['有没有','着装要求','，','还是','穿','什么','都','行','？'],extra:'吗',hint:'Two options joined by 还是. 什么都行 = anything is fine.',why:'<b>什么都行</b> = anything goes.'}
+];
+const ANS3=[
+ {lv:1,en:'I\'m wearing a ___.',t:['我','穿','N','。'],hint:'Copy the question: 你穿什么？ Swap 你 for 我, 什么 for the clothes.',why:'Same shape as the question.'},
+ {lv:1,en:'I\'m wearing a {c} ___.',t:['我','穿','C','的','N','。'],hint:'Colour + 的 comes before the clothes.',why:'Description first: <b>颜色 + 的 + thing</b>.'},
+ {lv:1,en:'I\'m not wearing a ___.',t:['我','不','穿','N','。'],hint:'不 goes right before the action.',why:'<b>不</b> sits right before what you\'re not doing.'},
+ {lv:2,en:'I\'m wearing a {c} ___.',t:['我','穿','M','C','的','N','。'],extra:'给',hint:'一件 / 一条 first, then colour + 的, then the clothes.',why:'Measure word, then description, then the thing.'},
+ {lv:2,en:'I\'m wearing a ___. And you?',t:['我','穿','N','，','你','呢','？'],extra:'吗',hint:'Answer first, then 你呢.',why:'<b>你呢？</b> throws the question back.'},
+ {lv:2,en:'The {c} ___ looks great.',t:['C','的','N','很','好看','。'],extra:'是',hint:'The clothes first, then 很好看. No 是 needed.',why:'Before a describing word use <b>很</b>, not 是.'},
+ {lv:3,en:'I\'m planning to wear a ___, because it\'s comfy.',t:['我','打算','穿','N','，','因为','很','舒服','。'],extra:'给',hint:'打算 before 穿. The reason comes after 因为.',why:'<b>打算</b> + action, then <b>因为</b> + reason.'},
+ {lv:3,en:'I\'ll dress a bit more formally.',t:['我','会','穿','得','正式','一点','。'],extra:'给',hint:'穿得 + how + 一点.',why:'<b>得</b> joins the action to how you do it.'},
+ {lv:3,en:'I\'m wearing this {c} ___ to the party.',t:['我','穿','Z','C','的','N','去','派对','。'],extra:'给',hint:'Wear it first, then 去派对. Actions go in the order they happen.',why:'<b>穿…去派对</b> = wear it to the party.'},
+ {lv:4,en:'I think a {c} ___ suits the party better.',t:['我','觉得','C','的','N','比较','适合','派对','。'],extra:'给',hint:'我觉得 + the whole idea. 比较 goes before 适合.',why:'<b>比较</b> = more, relatively. It goes before 适合.'},
+ {lv:4,en:'I\'m planning to wear a ___, but it\'s a bit cold.',t:['我','打算','穿','N','，','不过','天气','有点','冷','。'],extra:'给',hint:'不过 starts the second half. 有点 goes before 冷.',why:'<b>有点</b> = a bit (often for something not ideal).'},
+ {lv:4,en:'I bought the ___ online. It was cheap.',t:['N','是','我','在','网上','买','的','，','很','便宜','。'],extra:'给',hint:'Thing first, then 是我在网上买的.',why:'<b>是…的</b> highlights where you bought it.'},
+ {lv:5,en:'Dressing too formally is uncomfortable, so I\'ll just wear a ___.',t:['穿','得','太','正式','反而','不','舒服','，','我','就','穿','N','。'],extra:'给',hint:'The idea first (穿得太正式), then 反而 + the surprise result.',why:'<b>反而</b> = instead, contrary to what you\'d expect.'},
+ {lv:5,en:'This ___ is a bit old, but it\'s really comfy.',t:['Z','N','虽然','有点','旧','，','但是','穿着','很','舒服','。'],extra:'给',hint:'虽然 goes after the topic (这件…). 但是 starts the second half.',why:'<b>虽然…但是…</b> = although…, but…'},
+ {lv:5,en:'Rather than buying a new ___, I might as well wear an old one.',t:['与其','买','新','的','N','，','不如','穿','旧','的','。'],extra:'给',hint:'与其 + what you drop, 不如 + the better choice.',why:'<b>与其 A，不如 B</b>.'}
+];
+// Ch3 uses 天气 too
+D['天气']=['tiānqì','obj','weather'];
+
+/* ---- Chapter 4: food & drinks ---- */
+const ASK4=[
+ {lv:1,en:'What are you eating?',t:['你','吃','什么','？'],hint:'Who, then 吃, then 什么.',why:'<b>吃</b> = eat. 什么 sits where the food would go.'},
+ {lv:1,en:'What are you drinking?',t:['你','喝','什么','？'],hint:'Who, then 喝, then 什么.',why:'<b>喝</b> = drink. Same shape as 你吃什么？'},
+ {lv:1,en:'Do you drink tea?',t:['你','喝','茶','吗','？'],hint:'A normal sentence, then 吗.',why:'Any sentence + <b>吗</b> = a yes/no question.'},
+ {lv:2,en:'What do you like to eat?',t:['你','喜欢','吃','什么','？'],extra:'吗',hint:'喜欢 goes before the action 吃.',why:'<b>喜欢 + action</b> = like doing something.'},
+ {lv:2,en:'Coffee or tea?',t:['你','喝','咖啡','还是','茶','？'],extra:'吗',hint:'还是 already asks "or?", so no 吗.',why:'<b>还是</b> = or, in questions.'},
+ {lv:2,en:'Is this tasty?',t:['这个','好吃','吗','？'],extra:'是',hint:'No 是 before 好吃.',why:'Describing words don\'t need <b>是</b>.'},
+ {lv:3,en:'Is there anything you don\'t eat?',t:['你','有没有','不','吃','的','东西','？'],extra:'吗',hint:'有没有 already asks. 不吃的东西 = things you don\'t eat.',why:'<b>…的东西</b> = the things that….'},
+ {lv:3,en:'Can you eat spicy food?',t:['你','能','吃','辣','吗','？'],extra:'给',hint:'能 goes before the action 吃.',why:'<b>能</b> = can (are you able to).'},
+ {lv:3,en:'Do you drink alcohol?',t:['你','喝不喝','酒','？'],extra:'吗',hint:'喝不喝 already asks, so no 吗.',why:'<b>A不A</b>: 喝不喝 = drink or not.'},
+ {lv:4,en:'Are you allergic to anything?',t:['你','对','什么','过敏','吗','？'],extra:'给',hint:'对 + the thing comes before 过敏.',why:'<b>对…过敏</b> = allergic to…. The thing goes in the middle.'},
+ {lv:4,en:'Shall we order takeaway, or cook ourselves?',t:['我们','点','外卖','，','还是','自己','做','？'],extra:'吗',hint:'Two options joined by 还是. No 吗.',why:'<b>自己做</b> = make it ourselves.'},
+ {lv:4,en:'How much food do you think we should prepare?',t:['你','觉得','准备','多少','吃的','比较','好','？'],extra:'给',hint:'你觉得 first. 多少 goes right before 吃的.',why:'<b>吃的</b> = food, <b>喝的</b> = drinks.'},
+ {lv:5,en:'Are there any foods you avoid?',t:['你','有没有','什么','不','能','吃','的','？'],extra:'吗',hint:'有没有 + 什么 + 不能吃的.',why:'A gentle way to ask about diets or allergies.'},
+ {lv:5,en:'Besides drinks, do you need me to bring anything else?',t:['除了','喝的','，','还','需要我','带','什么','吗','？'],extra:'给',hint:'除了 … first, then 还 + the rest.',why:'<b>除了 A，还…</b> = besides A, also….'},
+ {lv:5,en:'Everyone\'s taste is different. How do you think we should arrange it?',t:['大家','口味','不','一样','，','你','看','怎么','安排','比较','好','？'],extra:'吗',hint:'State the situation first, then ask 你看怎么….',why:'<b>你看…</b> = what do you reckon. Friendly and collaborative.'}
+];
+D['要']=['yào','act','need to'];D['这个']=['zhège','who','this'];D['怎么']=['zěnme','ask','how?'];D['一样']=['yíyàng','act','the same'];D['多少']=['duōshao','ask','how much?'];D['开车']=['kāichē','act','drive'];D['所以']=['suǒyǐ','link','so'];
+const ANS4=[
+ {lv:1,en:'I\'m having ___.',t:['我','V','N','。'],hint:'Copy the question. Swap 你 for 我, 什么 for your food or drink.',why:'Same shape as the question.'},
+ {lv:1,en:'I don\'t have ___.',t:['我','不','V','N','。'],hint:'不 goes right before the action.',why:'<b>不</b> sits right before what you don\'t do.'},
+ {lv:1,en:'I like ___.',t:['我','喜欢','V','N','。'],hint:'喜欢 goes before the action.',why:'Chinese usually says "like <b>eating</b> X", not just "like X".'},
+ {lv:2,en:'I\'m bringing ___ (count it with a measure word).',t:['我','带','M','N','来','。'],extra:'给',hint:'Measure word right before the food.',why:'A plate of, a cup of, a bottle of: each has its measure word.'},
+ {lv:2,en:'The ___ is really tasty.',t:['N','很','G','。'],extra:'是',hint:'Food first, then 很 + 好吃 / 好喝. No 是.',why:'<b>好吃</b> for food, <b>好喝</b> for drinks.'},
+ {lv:2,en:'I\'m having ___. And you?',t:['我','V','N','，','你','呢','？'],extra:'吗',hint:'Answer first, then 你呢.',why:'<b>你呢？</b> keeps the chat going.'},
+ {lv:3,en:'I can\'t eat spicy food, so I\'m having ___.',t:['我','不','能','吃','辣','，','所以','我','V','N','。'],extra:'给',hint:'不能 before 吃. 所以 starts the second half.',why:'<b>所以</b> = so. Reason first, result second.'},
+ {lv:3,en:'I\'m bringing ___ (with a measure word), because everyone likes it.',t:['我','带','M','N','来','，','因为','大家','都','喜欢','。'],extra:'给',hint:'都 comes after 大家.',why:'<b>大家都</b>: 都 follows the people it covers.'},
+ {lv:3,noAlc:1,only:'喝',en:'I\'m driving, so I\'ll have ___.',t:['我','开车','，','所以','V','N','。'],extra:'给',hint:'Reason first (我开车), then 所以 + what you\'ll have.',why:'You can drop 我 in the second half when it\'s clear.'},
+ {lv:4,en:'I bought the ___ at the Asian grocer. It\'s really tasty.',t:['N','是','在','中国超市','买','的','，','特别','G','。'],extra:'给',hint:'Thing first, then 是 … 的 around where.',why:'<b>是…的</b> highlights where you got it.'},
+ {lv:4,en:'I\'m allergic to peanuts, but ___ is fine.',t:['我','对','花生','过敏','，','不过','N','没问题','。'],extra:'给',hint:'对 + thing + 过敏. Then 不过 + the good news.',why:'<b>对…过敏</b> and <b>不过</b> together.'},
+ {lv:4,en:'Besides ___, I\'m also bringing some fruit.',t:['除了','N','，','我','还','带','一些','水果','。'],extra:'给',hint:'除了 + thing first. 还 goes before 带.',why:'<b>除了 A，还 B</b> = besides A, also B.'},
+ {lv:5,only:'吃',en:'Rather than ordering takeaway, let\'s make ___ together.',t:['与其','点','外卖','，','不如','我们','一起','做','N','。'],extra:'给',hint:'与其 + what you drop, 不如 + the better idea.',why:'<b>与其 A，不如 B</b> = rather than A, might as well B.'},
+ {lv:5,en:'It\'s rare that everyone\'s here, so I\'ll bring extra ___.',t:['难得','大家','都','在','，','我','就','多','带','M','N','。'],extra:'给',hint:'难得 opens it. 多 goes right before 带.',why:'<b>多带</b> = bring extra.'},
+ {lv:5,en:'I eat anything. It\'s just that spicy food doesn\'t agree with me.',t:['我','什么都','吃','，','就是','不太','能','吃','辣','。'],extra:'给',hint:'什么都 before 吃. 就是 adds the one exception.',why:'<b>就是</b> = it\'s just that…. A soft way to add one exception.'}
+];
+D['在']=['zài','where','be in'];D['特别']=['tèbié','link','really'];D['不过']=['búguò','link','but'];D['难得']=['nándé','link','rare chance'];D['就']=['jiù','link','so'];
+
+/* ===== Explanations =====
+ For every card: [hint if wrong, pattern, why this order, when to use it]
+ hint: one clue about one key word, never the whole answer
+ pattern: the shape of this sentence
+ why: one plain sentence about the order
+ when: one plain sentence about when you'd say it ('' = skip) */
+const EX={
+who:{
+Ask:[
+ ['Look at 谁: it stays in the spot where the answer would go. It doesn\'t move to the front.','你 + 带 + 谁 + 来','Chinese keeps the question word (谁) in the same place as the answer. English moves "who" to the front.','When you want to know who someone is bringing to your event.'],
+ ['Look at 和谁 ("with who"): it goes before 来.','你 + 和谁 + 来','"With who" comes before the action. English puts "with who" at the end.','When you want to know who is coming along with someone.'],
+ ['Look at 吗: it goes at the very end.','你 + 带 + 朋友 + 来 + 吗','Write a normal sentence, then add 吗 at the end to make it a yes/no question. Nothing else moves.','When you only need a yes or no answer.'],
+ ['Look at 一起 ("together"): it goes right before 来.','谁 + 和你 + 一起 + 来','谁 is the one doing the coming, so it starts the sentence. 一起 always sits right before the action.','When you\'re curious about the other person, not the one you\'re talking to.'],
+ ['Look at 也 ("too"): it goes after 你 and before 带.','你 + 也 + 带 + 朋友 + 来 + 吗','也 always goes right before the action. English puts "too" at the end.','When others are bringing someone and you want to know if this person is too.'],
+ ['Look at 几个人 ("how many people"): these three stay together.','你 + 带 + 几个人 + 来','几个人 sits where the number would go in the answer (e.g. 两个人).','When you need a head count.'],
+ ['Look at 的: it closes the block "the one you\'re bringing" (你带来的).','你带来的 + 是 + 谁','你带来的 means "the one you\'re bringing". It\'s one block, and 是 links it to the question word.','When you want the focus on the person, not on the bringing.'],
+ ['Look at 周六 ("Saturday"): it goes before the action 带.','你 + 周六 + 带 + 谁 + 来','Time words go before the action, either right after 你 or at the very start. English puts the time at the end.','When the day matters, e.g. there are events on different days.'],
+ ['Look at 的: it joins "you bring" (你带) to 朋友.','你带的朋友 + 是 + 谁','你带的朋友 = "the friend you bring". Everything that describes 朋友 goes before it, joined by 的.','When you already know they\'re bringing a friend and want to know who.'],
+ ['Look at 打算 ("plan to"): it goes right before 带.','你 + 打算 + 带 + 谁 + 来','打算 sits right before the action you\'re planning.','When the party is still a while away and plans may change.'],
+ ['Look at 会不会: it already makes the question, so you don\'t need 吗.','你 + 会不会 + 带 + 朋友 + 来','会不会 ("will or won\'t") is a yes/no question on its own. Adding 吗 as well would be wrong.','A slightly more direct way to ask yes or no.'],
+ ['Look at 除了 ("besides"): it starts the sentence.','除了你，+ 还有 + 谁 + 来','除了 + person comes first. Then 还有谁 asks who else.','When you already know one person is coming and want to know the rest.'],
+ ['Look at 方便问一下 ("may I ask"): it opens the sentence.','方便问一下，+ 你 + 会 + 带 + 朋友 + 来 + 吗','The polite opener comes first, then a normal 吗 question.','With someone you don\'t know well, like a host checking numbers.'],
+ ['Look at 大概 ("roughly"): it goes right before 几个人.','你那边 + 大概 + 几个人 + 来','你那边 ("your side") is who you\'re asking about. 大概 sits right before the number it\'s estimating.','When you\'re organising and need a rough number from each group.'],
+ ['Look at 请问: it opens the sentence, before 你.','请问，+ 你 + 会 + 带 + 家人 + 来 + 吗','请问 ("may I ask") goes first. The rest is a normal 吗 question.','A simple way to sound polite with someone you\'ve just met.']
+],
+Answer:[
+ ['Look at the question 你带谁来？ Your answer keeps the same order.','我 + 带 + Person + 来','Swap 你 for 我 and 谁 for your person. Everything else stays where it was in the question.','The quickest, most natural answer.'],
+ ['Look at 和 + your person: they go before 来.','我 + 和 + Person + 来','"With who" goes before the action 来. In English, "with my roommate" comes at the end.','When you\'re arriving together, rather than bringing someone along.'],
+ ['Look at 我的 ("my"): it goes right before your person.','我 + 带 + 我的 Person + 来','我的 always sits right before the person it belongs to.','When you want to make clear it\'s your own friend or family member.'],
+ ['Look at 一起: it goes right before 来. Then 你呢 is a separate little question.','我 + 和 Person + 一起 + 来。你呢？','一起 sits right before the action. 你呢？ ("and you?") asks the same question back.','To keep the chat going instead of just answering.'],
+ ['Look at 和我: it comes after your person and before 一起.','Person + 和我 + 一起 + 来','Your person starts the sentence, so the focus is on them.','When the other person is the main news, e.g. 妈妈和我一起来.'],
+ ['Look at 也 ("too"): it goes right after 我.','我 + 也 + 带 + Person + 来','也 always goes before the action. English puts "too" at the end.','When someone else just said they\'re bringing someone.'],
+ ['Look at 周六: it goes before 带. 因为 starts the second half.','我 + 周六 + 带 + Person + 来，+ 因为 …','Time goes before the action. The reason (因为…) comes after the main sentence.','When you want to give a reason, not just an answer.'],
+ ['Look at 的: it closes the block 我带来的 ("what I\'m bringing").','我带来的 + 是 + 我的 Person','我带来的 means "what I\'m bringing". 是 links it to the answer, so the answer comes last.','When you want the answer to stand out: the listener waits until the last word to hear who it is.'],
+ ['Look at 和: both people go between 带 and 来.','我 + 带 + Person 和 他/她的朋友 + 来','Everyone you\'re bringing sits between 带 and 来. 他的 / 她的 shows whose friend it is.','When you\'re bringing more than one person.'],
+ ['Look at 而且 ("and also"): it starts the last part.','我带我的 Person 来。+ 他/她人特别好，+ 而且 …','Each sentence talks about the same person. 而且 adds one more point.','When you want to introduce someone before they arrive.'],
+ ['Look at 不过 ("but"): it starts the second half.','我 + 会 + 带 + Person + 来，+ 不过 …','The main plan comes first, then 不过 adds the catch. 可能会 goes before the action 到.','When you want to let the host know about a small problem.'],
+ ['Look at 一个人 ("alone"): it goes before 来.','我不带朋友来，+ 我 + 一个人 + 来','不 goes right before the action it cancels. 一个人 sits before 来, just like 一起 does.','When you\'re coming on your own.'],
+ ['Look at 多 ("extra"): it goes right before 带.','不好意思，+ 我 + 能 + 多带 + 一个朋友 + 吗','不好意思 opens politely. 多 sits right before 带 to mean "one more than planned".','When you want to ask the host if it\'s OK to bring an extra person.'],
+ ['Look at 难得: it starts the sentence. 就 comes before 带.','难得 + Person + 也在堪培拉，+ 我 + 就 + 带 + 他/她 + 来','难得… sets up the situation. 就 then links it to what you\'ll do.','When there\'s a special reason you\'re bringing someone.'],
+ ['Look at 吗: the question ends there. 不知道方不方便 is added after.','我可以带我的 Person 来吗？+ 不知道方不方便？','Ask the question first. Then 不知道方不方便 ("not sure if that\'s OK") softens it.','When you want to give the host an easy way to say no.']
+]},
+gift:{
+Ask:[
+ ['Look at 什么: it stays where the answer would go, between 带 and 来.','你 + 带 + 什么 + 来','The question word sits in the same spot as the answer. English moves "what" to the front.','When you want to know what someone is bringing.'],
+ ['Look at 吗: it goes at the very end.','你 + 带 + 东西 + 来 + 吗','A normal sentence + 吗 = a yes/no question.','When you just want to know if they\'re bringing anything at all.'],
+ ['Look at 什么: it goes after 买.','你 + 买 + 什么','Who + action + what. The question word sits where the thing would go.','When someone says they\'re going shopping for the party.'],
+ ['Look at 在哪儿 ("where"): it goes before 买.','你 + 在哪儿 + 买','Where goes before the action. English puts "where" at the front of the question.','When you want shopping tips or to know where to go.'],
+ ['Look at 贵不贵: it already asks the question, so you don\'t need 吗.','东西 + 贵不贵','贵不贵 ("pricey or not") is a yes/no question on its own. 东西 comes first as the topic.','When you\'re wondering how much to spend.'],
+ ['Look at 什么时候 ("when"): it goes before 去买.','你 + 什么时候 + 去买','When goes before the action. 去 + 买 are two actions in the order they happen: go, then buy.','When you might want to go shopping together.'],
+ ['Look at 给谁 ("for who"): it goes before 带.','你 + 给谁 + 带 + 东西','给 + person ("for someone") goes before the action. English puts "for who" at the end.','When the thing is for one person, not the whole party.'],
+ ['Look at 打算 ("plan to"): it goes right before 花 ("spend").','你 + 打算 + 花 + 多少钱','打算 sits right before the action you\'re planning. 多少钱 sits where the amount would go.','When you\'re agreeing on a budget.'],
+ ['Look at 的: it closes the block 你带来的 ("that you\'re bringing").','你带来的东西 + 是 + 什么','你带来的东西 = "the thing you\'re bringing". The description goes before 东西, joined by 的.','When you\'ve heard they\'re bringing something and you\'re curious.'],
+ ['Look at 你觉得: it opens the sentence. 比较好 comes at the end.','你觉得 + 带什么 + 比较好','你觉得 ("do you think") comes first, then the whole idea you\'re asking about.','When you want someone\'s advice.'],
+ ['Look at 是 and 的: they wrap around "online" and "buy".','你 + 是 + 在网上买 + 的 + 吗','是…的 wraps around the detail you\'re asking about (where it was bought). It\'s used for things that already happened.','When the thing is already bought and you want to know how.'],
+ ['Look at 怎么样: it goes at the very end, after a comma.','我们 + 一起 + 买，+ 怎么样','Make the suggestion first, then add 怎么样 ("how about it?").','When you want to suggest an idea in a friendly way.'],
+ ['Look at 请问: it opens the sentence. 吗 goes at the end.','请问，+ 需要我 + 带 + 什么 + 吗','需要我带… = "do you need me to bring…". 请问 at the front makes it polite.','When you\'re a guest offering to help the host.'],
+ ['Look at 你带的东西: it comes first, as the topic.','你带的东西，+ 大家 + 都 + 能 + 用 + 吗','Name the thing first, then ask about it. 都 comes after 大家 ("everyone").','When you want to check the thing suits the whole group.'],
+ ['Look at 有没有: it opens the question. 的 goes at the end.','有没有 + 什么 + 不能带 + 的','有没有什么…的 = "is there anything that…". 不能带 sits inside it.','When you want to know the rules before you shop.']
+],
+Answer:[
+ ['Look at the question 你带什么来？ Your answer keeps the same order.','我 + 带 + Thing + 来','Swap 你 for 我 and 什么 for your thing. Nothing else moves.','The quickest, most natural answer.'],
+ ['Look at the measure word (一瓶, 一个…): it goes right before the thing.','我 + 带 + 一 + measure word + Thing + 来','Number + measure word always sit right before the thing. Each thing has its own measure word.','When you\'re saying how many, even if it\'s just one.'],
+ ['Look at 买: it comes before the thing.','我 + 买 + Thing','Who + action + thing: the most basic Chinese sentence.','When someone asks what you\'re buying.'],
+ ['Look at 在超市 ("at the supermarket"): it goes before 买.','我 + 在超市 + 买 + Thing','Where goes before the action. English puts "at the supermarket" at the end.','When you want to say where you\'re shopping.'],
+ ['Look at the thing: it starts the sentence. There\'s no 是 before 贵.','Thing + 不贵，+ 很便宜','The thing comes first as the topic. Describing words like 贵 and 便宜 don\'t need 是.','When someone worries it\'s expensive.'],
+ ['Look at 一起: it goes before 买. 怎么样 comes last.','我们 + 一起 + 买 + Thing，+ 怎么样','一起 goes before the action. 怎么样 at the end turns it into a friendly suggestion.','When you want to split the cost or shop together.'],
+ ['Look at 给大家 ("for everyone"): it goes before 带.','我 + 给大家 + 带 + 一 + measure word + Thing','给 + who it\'s for goes before the action.','When the thing is for the whole group.'],
+ ['Look at 的: it closes the block 我带来的 ("what I\'m bringing").','我带来的 + 是 + Thing','我带来的 is one block. 是 links it to the answer, so the answer comes last.','When you want the answer to stand out: the listener waits until the last word to hear what it is.'],
+ ['Look at 都: it comes after 大家 ("everyone").','我 + 打算 + 带 + Thing，+ 因为 + 大家都喜欢','都 always comes after the people it covers. The reason (因为…) comes after the main sentence.','When you want to explain your choice.'],
+ ['Look at 而且 ("and also"): it starts the last part.','我觉得 + 带 Thing 比较好，+ 而且 + 不贵','我觉得 + your idea, then 而且 adds a second reason.','When you\'re giving advice with more than one reason.'],
+ ['Look at the thing: it starts the sentence. 是 and 的 wrap around "bought online".','Thing + 我 + 是 + 在网上买 + 的','The thing comes first as the topic. 是…的 highlights the detail: where you bought it.','When someone asks about something you already bought.'],
+ ['Look at 不过 ("but"): it starts the second half.','我 + 带 + Thing，+ 不过 + 不是新的','The main fact comes first, then 不过 adds the catch. 新的 = "a new one".','When you want to be upfront that it\'s second-hand.'],
+ ['Look at 难得: it starts the sentence. 就 comes before 带.','难得 + 大家聚一聚，+ 我 + 就 + 带 + 一 + measure word + Thing + 来','难得… sets up the situation. 就 links it to what you\'ll do because of it.','When it\'s a special get-together and you want to bring something nice.'],
+ ['Look at 是 and 的: they wrap around 我自己挑 ("I picked it myself").','Thing + 是 + 我自己挑 + 的，+ 不知道 + 大家喜不喜欢','The thing comes first. 是…的 highlights who chose it. 不知道 + 喜不喜欢 adds a modest "not sure if you\'ll like it".','When you\'re handing over something you chose.'],
+ ['Look at 与其 and 不如: 与其 goes before the option you drop, 不如 before the better one.','与其 + 买新的，+ 不如 + 带 + 我家的 Thing','与其 A，不如 B = "rather than A, B is better". The option you drop always comes first.','When you\'re suggesting a cheaper or easier idea.']
+]},
+wear:{
+Ask:[
+ ['Look at 什么: it goes after 穿.','你 + 穿 + 什么','The question word sits where the clothes would go in the answer.','When you want to know what someone is wearing.'],
+ ['Look at 什么颜色 ("what colour"): these two stay together.','你 + 穿 + 什么颜色','什么 + a noun = "which kind of…". The block sits where the answer would go.','When you want to match or not clash.'],
+ ['Look at 吗: it goes at the very end.','你 + 穿 + 外套 + 吗','A normal sentence + 吗 = a yes/no question.','When you\'re checking the weather or dress code.'],
+ ['Look at 好看吗 ("does it look good?"): it comes after what you\'re wearing.','我 + 穿 + 这件，+ 好看 + 吗','Say what you\'re wearing first, then ask about it.','When you want a quick opinion on your outfit.'],
+ ['Look at 还是 ("or"): it goes between the two colours. No 吗.','你 + 穿 + 红色 + 还是 + 黑色','还是 already makes it a question, so 吗 isn\'t needed.','When you\'re offering two choices.'],
+ ['Look at 你觉得: it opens the sentence. 好 comes at the end.','你觉得 + 我穿什么 + 好','你觉得 ("do you think") comes first, then the whole idea. …什么好 = "what would be good".','When you\'re asking for advice.'],
+ ['Look at 得: it goes right after 穿, before how you dress.','要 + 穿得 + 很正式 + 吗','得 joins an action to how it\'s done: 穿得正式 = "dress formally".','When you\'re checking the dress code.'],
+ ['Look at 哪件 ("which one"): it goes after 穿.','你 + 打算 + 穿 + 哪件','打算 sits right before the action. 哪件 sits where the answer would go.','When someone has a few options and you\'re helping them choose.'],
+ ['Look at 有没有: it already asks the question, so no 吗.','派对 + 有没有 + 着装要求','The party comes first as the topic. 有没有 = "is there or isn\'t there".','When you want to know if there\'s a dress code.'],
+ ['Look at 适合 ("suits"): it goes right before 派对. No word for "for".','这件衣服 + 适合 + 派对 + 吗','适合 takes the thing directly: 适合派对 = "suits the party".','When you\'re not sure your outfit fits the occasion.'],
+ ['Look at 还是: both sides keep the same shape, 穿 … 去.','你 + 穿裙子去 + 还是 + 穿裤子去','穿…去 = "go wearing…". Each choice repeats the full shape around 还是.','When you\'re asking someone to pick between two outfits.'],
+ ['Look at 是 and 的: they wrap around 在哪儿买 ("bought where").','你那件衬衫 + 是 + 在哪儿买 + 的','是…的 asks about a detail of something already done, here where it was bought.','When you like someone\'s clothes and want to know where they got them.'],
+ ['Look at 一点 ("a bit"): it goes after 随便 ("casual").','穿得 + 随便一点，+ 可以吗','穿得 + how you dress + 一点, then ask 可以吗 ("is that OK?").','When you\'d rather not dress up.'],
+ ['Look at 这样穿 ("dressing like this"): it starts the sentence.','这样穿 + 会不会 + 太正式','这样穿 is the topic. 会不会 makes the question, so no 吗.','When you\'re worried you\'re overdressed.'],
+ ['Look at 还是 ("or"): it joins the two halves. 什么都行 comes last.','有没有着装要求，+ 还是 + 穿什么都行','Two options joined by 还是. 什么都行 = "anything is fine".','When you want to know how relaxed the party is.']
+],
+Answer:[
+ ['Look at the question 你穿什么？ Your answer keeps the same order.','我 + 穿 + Clothes','Swap 你 for 我 and 什么 for your clothes. Nothing else moves.','The quickest, most natural answer.'],
+ ['Look at the colour and 的: they go before the clothes.','我 + 穿 + Colour + 的 + Clothes','Descriptions go before the thing, joined by 的. English does the same with "red jacket".','When you want to add a detail.'],
+ ['Look at 不: it goes right before 穿.','我 + 不 + 穿 + Clothes','不 always sits right before the action it cancels.','When someone assumes you\'ll wear something.'],
+ ['Look at the measure word (一件 / 一条): it goes before the colour.','我 + 穿 + 一 + measure word + Colour 的 + Clothes','Measure word first, then the description, then the thing. 件 is for tops, 条 for long things like skirts and trousers.','When you\'re describing exactly what you\'ll wear.'],
+ ['Look at 你呢: it comes after your answer.','我 + 穿 + Clothes，+ 你呢','Answer first, then 你呢 ("and you?") asks the same question back.','To keep the chat going.'],
+ ['Look at 很: it goes before 好看. There\'s no 是.','Colour 的 Clothes + 很 + 好看','The clothes come first. Describing words like 好看 use 很, not 是.','When you\'re giving a compliment.'],
+ ['Look at 因为: it starts the second half.','我 + 打算 + 穿 + Clothes，+ 因为 + 很舒服','The plan comes first, then the reason after 因为.','When you want to explain your choice.'],
+ ['Look at 得: it goes right after 穿.','我 + 会 + 穿得 + 正式一点','得 joins an action to how you do it. 一点 at the end means "a bit more".','When you\'re telling the host you\'ll dress up.'],
+ ['Look at 去派对: it comes last, after the clothes.','我 + 穿 + 这件 Colour 的 Clothes + 去派对','Actions go in the order they happen: put it on, then go to the party.','When you\'re describing your plan for the night.'],
+ ['Look at 比较 ("more"): it goes before 适合.','我觉得 + Colour 的 Clothes + 比较 + 适合派对','我觉得 + your idea. 比较 sits right before the word it compares.','When you\'re helping someone choose.'],
+ ['Look at 有点 ("a bit"): it goes before 冷.','我 + 打算 + 穿 + Clothes，+ 不过 + 天气有点冷','The plan comes first, then 不过 adds the catch. 有点 is often used for things that aren\'t ideal.','When the weather might change your plan.'],
+ ['Look at the clothes: they start the sentence. 是 and 的 wrap around "bought online".','Clothes + 是 + 我在网上买 + 的，+ 很便宜','The clothes come first as the topic. 是…的 highlights where you bought them.','When someone asks about your outfit.'],
+ ['Look at 反而 ("instead"): it goes before 不舒服.','穿得太正式 + 反而 + 不舒服，+ 我就穿 Clothes','The idea comes first, then 反而 points to the opposite of what you\'d expect.','When you\'re explaining why you\'re dressing down.'],
+ ['Look at 虽然 ("although"): it goes after 这件 + clothes.','这件 Clothes + 虽然 + 有点旧，+ 但是 + 穿着很舒服','The clothes come first as the topic. 虽然 and 但是 each start one half.','When you\'re defending an old favourite.'],
+ ['Look at 与其 and 不如: 与其 goes before the option you drop.','与其 + 买新的 Clothes，+ 不如 + 穿旧的','与其 A，不如 B = "rather than A, B is better". The option you drop always comes first.','When you\'re choosing the easier or cheaper option.']
+]},
+food:{
+Ask:[
+ ['Look at 什么: it goes after 吃.','你 + 吃 + 什么','The question word sits where the food would go in the answer.','When you want to know what someone is having.'],
+ ['Look at 什么: it goes after 喝.','你 + 喝 + 什么','Same shape as 你吃什么？, just with 喝 ("drink").','When you\'re offering or ordering drinks.'],
+ ['Look at 吗: it goes at the very end.','你 + 喝 + 茶 + 吗','A normal sentence + 吗 = a yes/no question.','When you\'re offering something.'],
+ ['Look at 喜欢: it goes before 吃.','你 + 喜欢 + 吃 + 什么','Chinese says "like eating…", so 喜欢 comes before the action.','When you\'re planning food for someone.'],
+ ['Look at 还是 ("or"): it goes between the two drinks. No 吗.','你 + 喝 + 咖啡 + 还是 + 茶','还是 already makes it a question, so 吗 isn\'t needed.','When you\'re offering two choices.'],
+ ['Look at 好吃: there\'s no 是 before it.','这个 + 好吃 + 吗','Describing words like 好吃 don\'t need 是.','When you\'re trying something new.'],
+ ['Look at 有没有: it already asks, so no 吗. 的东西 goes at the end.','你 + 有没有 + 不吃 + 的东西','不吃的东西 = "things you don\'t eat". The description goes before 东西, joined by 的.','When you\'re checking someone\'s diet before cooking.'],
+ ['Look at 能 ("can"): it goes before 吃.','你 + 能 + 吃辣 + 吗','能 sits right before the action.','When you\'re about to order spicy food.'],
+ ['Look at 喝不喝: it already asks, so no 吗.','你 + 喝不喝 + 酒','喝不喝 ("drink or not") is a yes/no question on its own.','When you\'re buying drinks for the party.'],
+ ['Look at 对什么 ("to what"): it goes before 过敏.','你 + 对什么 + 过敏 + 吗','对 + the thing goes before 过敏 ("allergic"). English says "allergic to…" in the other order.','When you\'re cooking for someone.'],
+ ['Look at 还是: it joins the two options. No 吗.','我们 + 点外卖，+ 还是 + 自己做','Two full options joined by 还是. 自己做 = "make it ourselves".','When you\'re planning the food together.'],
+ ['Look at 你觉得: it opens the sentence. 比较好 comes at the end.','你觉得 + 准备多少吃的 + 比较好','你觉得 comes first, then the whole idea. 多少 sits right before 吃的 ("food").','When you\'re working out quantities.'],
+ ['Look at 有没有什么: it opens the question. 的 goes at the end.','你 + 有没有 + 什么 + 不能吃 + 的','有没有什么…的 = "is there anything that…". A gentle way to ask about allergies or diets.','When you want to ask politely about dietary needs.'],
+ ['Look at 除了 ("besides"): it starts the sentence. 还 comes after the comma.','除了喝的，+ 还 + 需要我带什么 + 吗','除了 A comes first. Then 还 ("also") asks about the rest.','When you\'re already bringing drinks and want to help more.'],
+ ['Look at 你看 ("what do you reckon"): it starts the question part.','大家口味不一样，+ 你看 + 怎么安排 + 比较好','State the situation first, then ask 你看… for the other person\'s idea.','When you\'re organising and want to work it out together.']
+],
+Answer:[
+ ['Look at the question 你吃什么？ / 你喝什么？ Your answer keeps the same order.','我 + 吃 / 喝 + Food','Swap 你 for 我 and 什么 for your food or drink. Nothing else moves.','The quickest, most natural answer.'],
+ ['Look at 不: it goes right before 吃 / 喝.','我 + 不 + 吃 / 喝 + Food','不 always sits right before the action it cancels.','When you\'re turning something down.'],
+ ['Look at 喜欢: it goes before 吃 / 喝.','我 + 喜欢 + 吃 / 喝 + Food','Chinese says "like eating…", so 喜欢 comes before the action.','When you\'re telling someone your favourite.'],
+ ['Look at the measure word (一盘, 一杯…): it goes right before the food.','我 + 带 + 一 + measure word + Food + 来','Number + measure word sit right before the food. A plate is 盘, a cup is 杯, a bottle is 瓶.','When you\'re saying what you\'ll bring.'],
+ ['Look at 很: it goes before 好吃 / 好喝. There\'s no 是.','Food + 很 + 好吃 / 好喝','The food comes first. Describing words use 很, not 是. Use 好吃 for food and 好喝 for drinks.','When you\'re giving a compliment.'],
+ ['Look at 你呢: it comes after your answer.','我 + 吃 / 喝 + Food，+ 你呢','Answer first, then 你呢 ("and you?") asks the same question back.','To keep the chat going.'],
+ ['Look at 所以 ("so"): it starts the second half.','我不能吃辣，+ 所以 + 我 + 吃 / 喝 + Food','The reason comes first, then 所以 + the result.','When you\'re explaining your choice.'],
+ ['Look at 都: it comes after 大家 ("everyone").','我 + 带 + 一 + measure word + Food + 来，+ 因为 + 大家都喜欢','都 always comes after the people it covers. The reason comes after the main sentence.','When you want to explain your choice.'],
+ ['Look at 所以: it starts the second half.','我开车，+ 所以 + 喝 + Drink','Reason first, then 所以 + the result. You can drop 我 in the second half when it\'s clear.','When you\'re turning down alcohol.'],
+ ['Look at the food: it starts the sentence. 是 and 的 wrap around "bought at the Asian grocer".','Food + 是 + 在中国超市买 + 的，+ 特别好吃 / 好喝','The food comes first as the topic. 是…的 highlights where you bought it.','When someone asks where you got it.'],
+ ['Look at 对花生 ("to peanuts"): it goes before 过敏.','我 + 对花生 + 过敏，+ 不过 + Food + 没问题','对 + the thing goes before 过敏. 不过 then adds what\'s fine.','When you\'re explaining an allergy.'],
+ ['Look at 除了: it starts the sentence. 还 goes before 带.','除了 + Food，+ 我 + 还 + 带 + 一些水果','除了 A comes first. 还 ("also") sits right before the action.','When you\'re bringing more than one thing.'],
+ ['Look at 与其 and 不如: 与其 goes before the option you drop.','与其 + 点外卖，+ 不如 + 我们一起做 + Food','与其 A，不如 B = "rather than A, B is better". The option you drop always comes first.','When you\'re suggesting cooking together.'],
+ ['Look at 多 ("extra"): it goes right before 带.','难得 + 大家都在，+ 我 + 就 + 多带 + 一 + measure word + Food','难得… sets up the situation. 就 links it to your action. 多 sits right before 带.','When it\'s a special occasion and you want to bring extra.'],
+ ['Look at 什么都 ("anything"): it goes before 吃. 就是 adds the exception.','我 + 什么都 + 吃，+ 就是 + 不太能吃辣','什么都 sits before the action. 就是 ("it\'s just that") adds one exception.','When someone asks if you have any food preferences.']
+]}
+};
+
+const CONTACT={group:'https://chat.whatsapp.com/KqXqZZJGdepCtylb7O0c97'};
+const SCENES=[
+ {id:'party',emoji:'🎉',title:"You're invited to a party!",intro:'Before the big day, the host has a few questions for you. Let\'s answer them in Mandarin.',
+  desc:'Four chapters: who you\'re bringing, what you bring, what to wear, and food & drinks.',
+  chapters:[
+   {id:'who',emoji:'👥',title:"Who's coming",zh:'你带谁来？',ask:ASK1,ans:ANS1,nouns:NOUNS1,swap:'Swap person'},
+   {id:'gift',emoji:'🎁',title:'The gift',zh:'你带什么来？',ask:ASK2,ans:ANS2,nouns:NOUNS2,swap:'Swap item',opens:'2026-11-16'},
+   {id:'wear',emoji:'👗',title:'What to wear',zh:'你穿什么？',ask:ASK3,ans:ANS3,nouns:NOUNS3,swap:'Swap outfit',opens:'2026-11-23'},
+   {id:'food',emoji:'🍽️',title:'Food & drinks',zh:'你吃什么？喝什么？',ask:ASK4,ans:ANS4,nouns:NOUNS4,swap:'Swap food',opens:'2026-11-30'}]}
+];
+let pending=null,preview=false;
+const isOpen=c=>preview||!c.opens||new Date()>=new Date(c.opens+'T00:00:00');
+const opensLabel=c=>new Date(c.opens+'T00:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+let SC=SCENES[0],CH=SC.chapters[0],ASK=CH.ask,ANS=CH.ans,NOUNS=CH.nouns;
+
+/* ---------- state ---------- */
+let level=1;
+const PUNCT=['，','。','？','：'];
+const cur={Ask:null,Answer:null};
+const state=new Map();
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!==undefined)e.innerHTML=h;return e};
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function nounsFor(p){return NOUNS.filter(n=>(!p.people||n[5])&&(!p.only||n[7]===p.only)&&(!p.noAlc||n[8]!=='alc'))}
+function resolve(seq,noun,col){return seq.map(w=>w==='N'?noun[0]:w==='P'?noun[4]:w==='M'?'一'+noun[6]:w==='Z'?'这'+noun[6]:w==='C'?(col||COLOURS[0])[0]:w==='V'?noun[7]:w==='G'?(noun[7]==='喝'?'好喝':'好吃'):w)}
+function tokInfo(w,noun){if(noun&&w===noun[0])return{zh:w,py:noun[1],en:noun[2],role:'obj'};const nn=(NOUNS||[]).find(n=>n[0]===w);if(nn&&!D[w])return{zh:w,py:nn[1],en:nn[2],role:'obj'};const d=D[w]||['','link',''];return{zh:w,py:d[0],role:d[1],en:d[2]}}
+function setup(key,p,keepNoun){const s=state.get(key)||{};
+  if(!keepNoun||!s.noun||!nounsFor(p).includes(s.noun)){const ns=nounsFor(p);let n=rnd(ns);if(s.noun&&ns.length>1)while(n[0]===s.noun[0])n=rnd(ns);s.noun=n;s.color=rnd(COLOURS)}
+  const words=resolve(p.t,s.noun,s.color).filter(w=>!PUNCT.includes(w));
+  if(p.extra&&p.lv>=2)words.push(p.extra);
+  let pool=words.map((w,i)=>({id:i,...tokInfo(w,s.noun)}));
+  do{pool=shuffle(pool)}while(pool.length>2&&pool.map(x=>x.zh).join('')===words.join(''));
+  s.pool=pool;s.placed=[];s.result=null;state.set(key,s);return s}
+function check(p,s){const got=s.placed.map(x=>x.zh).join('|');
+  for(const seq of [p.t].concat(p.alts||[])){const r=resolve(seq,s.noun,s.color);if(r.filter(w=>!PUNCT.includes(w)).join('|')===got)return r}return null}
+function show(seq,noun){const zh=seq.join('');let py='',cap=true;
+  seq.forEach(w=>{if(PUNCT.includes(w)){py+=w==='，'?',':w==='。'?'.':w==='？'?'?':':';cap=w!=='，';return}
+    let p=tokInfo(w,noun).py;if(cap){p=p.charAt(0).toUpperCase()+p.slice(1);cap=false}py+=(py?' ':'')+p});
+  return{zh,py:py.replace(/ ([,.?:])/g,'$1')}}
+
+/* ---------- render ---------- */
+function tileBtn(x,fn){const b=el('button','tile r-'+x.role,`<span class="z">${x.zh}</span><span class="p">${x.py}</span><span class="e">${x.en}</span>`);b.type='button';b.onclick=fn;return b}
+const deck={Ask:[],Answer:[]},done={Ask:new Set(),Answer:new Set()};
+function list(kind){return (kind==='Ask'?ASK:ANS).map((p,i)=>({p,i}))}
+function refill(kind){
+  // easy first, harder later, with a little mixing: sort by level plus a random nudge of up to 2.3 levels
+  let d=list(kind).map(x=>({...x,k:x.p.lv+Math.random()*2.3})).sort((a,b)=>a.k-b.k);
+  const k=d.findIndex(x=>x.p.lv===1);if(k>0){const [e]=d.splice(k,1);d.unshift(e)}
+  if(d.length>1&&d[0].i===cur[kind])d.splice(1,0,d.shift());deck[kind]=d}
+function draw(kind){if(!deck[kind].length)refill(kind);const n=deck[kind].shift();cur[kind]=n.i;setup(kind+n.i,n.p,false)}
+function nextWay(kind){draw(kind);renderAll()}
+function exOf(kind){const e=(EX[CH.id]||{})[kind];const r=e&&e[cur[kind]];const p=(kind==='Ask'?ASK:ANS)[cur[kind]];return r||[p.hint,'',p.why,'']}
+function enOf(p,s,html){const n=html?`<u>${s.noun[2]}</u>`:s.noun[2],c=s.color?(html?`<u>${s.color[1]}</u>`:s.color[1]):'';return p.en.replace('___',n).replace('{c}',c)}
+function renderCard(kind){
+  const box=$(kind==='Ask'?'#ask':'#ans');box.innerHTML='';
+  const l=list(kind),pos=l.findIndex(x=>x.i===cur[kind]),p=(kind==='Ask'?ASK:ANS)[cur[kind]],key=kind+cur[kind],s=state.get(key);
+  $(kind==='Ask'?'#cAsk':'#cAns').textContent=`${done[kind].size} of ${l.length} ways done`;
+  const c=el('div','card'+(s.result==='ok'?' done':''));
+  const head=el('div','chead');
+  head.appendChild(el('div','',`<div class="tag">${kind==='Ask'?'HOW WOULD YOU ASK':'HOW WOULD YOU ANSWER'}</div><div class="en">${enOf(p,s,true)}</div>`));
+  const hb=el('div','hbtns');
+  {const aw=el('button','swap',kind==='Ask'?'🔁 Another way<small>to ask</small>':'🔁 Another way<small>to answer</small>');aw.type='button';aw.onclick=()=>nextWay(kind);hb.appendChild(aw)}
+  if((p.t.includes('N')||p.t.includes('C'))){const sw=el('button','swap',`🔀 ${CH.swap||'Swap'}<small>${s.color&&p.t.includes('C')?s.color[0]+' · ':''}${s.noun[0]} · from ${s.noun[3]}</small>`);sw.type='button';
+    sw.onclick=()=>{setup(key,p,false);renderAll()};hb.appendChild(sw)}
+  head.appendChild(hb);
+  c.appendChild(head);
+  const line=el('div','line');
+  if(!s.placed.length)line.appendChild(el('span','ph','Tap the tiles below in order'));
+  s.placed.forEach((x,i)=>line.appendChild(tileBtn(x,()=>{if(s.result==='ok')return;s.placed.splice(i,1);s.pool.push(x);s.result=null;renderAll()})));
+  c.appendChild(line);
+  if(s.result!=='ok'){
+    const pool=el('div','pool');s.pool.forEach((x,i)=>pool.appendChild(tileBtn(x,()=>{s.pool.splice(i,1);s.placed.push(x);s.result=null;renderAll()})));
+    c.appendChild(pool);
+    if(p.extra&&p.lv>=2)c.appendChild(el('div','note','One tile is extra. Leave it out.'));
+    const acts=el('div','acts');
+    const ck=el('button','btn main','Check');ck.type='button';
+    ck.onclick=()=>{if(!s.placed.length)return toast('Tap some tiles first');s.match=check(p,s);s.result=s.match?'ok':'no';if(s.match)done[kind].add(cur[kind]);renderAll()};
+    const rs=el('button','btn','Reset');rs.type='button';rs.onclick=()=>{setup(key,p,true);renderAll()};
+    acts.append(ck,rs);c.appendChild(acts)}
+  if(s.result==='ok'){const sh=show(s.match,s.noun);
+    const f=el('div','fb ok',`<div class="v">✓ Yes!</div><div class="lvl">${p.lv>=4?'🔥':p.lv>=3?'💪':'🎯'} That was an <b>HSK ${p.lv}</b> sentence${p.lv>=4?'. Not easy!':p.lv===3?'. Nice work!':'.'}</div><div class="zh">${sh.zh}</div><div class="py">${sh.py}</div><div class="me">${enOf(p,s)}</div>${(()=>{const e=exOf(kind);return `<div class="ex3"><div><span>Pattern</span><b class="pat">${e[1]}</b></div><div><span>Why this order</span>${e[2]}</div>${e[3]?`<div><span>When to use it</span>${e[3]}</div>`:''}</div>`})()}`);
+    const a=el('div','acts');
+    const n=el('button','btn next',kind==='Ask'?'🔁 Another way to ask':'🔁 Another way to answer');n.type='button';n.onclick=()=>nextWay(kind);a.appendChild(n);
+    const again=el('button','btn sm',p.t.includes('N')?'↺ Try again with a new word':'↺ Try again');again.type='button';again.onclick=()=>{setup(key,p,!p.t.includes('N'));renderAll()};a.appendChild(again);
+    const cp=el('button','btn sm','Copy to share');cp.type='button';cp.onclick=()=>copy(`${sh.zh}\n${sh.py}\n${SC.emoji} Learnése Mandarin Scenes · ${CH.title}`,'Copied. Share it and add a voice note 🎙️');a.appendChild(cp);
+    f.appendChild(a);c.appendChild(f)}
+  if(s.result==='no'){const mine=s.placed.map(x=>x.zh).join('');
+    const f=el('div','fb no',`<div class="v">✗ Not quite</div><div class="why">💡 ${exOf(kind)[0]}</div><div class="note">Still not sure why? Ask in the Learnése community on WhatsApp. Someone else is probably wondering too. Not in the group yet? The button lets you join first.</div>`);
+    const msg=`Is this right? 🤔 ${mine}\n(${SC.title.replace('!','')} · ${CH.title} · "${enOf(p,s)}")`;
+    const a=el('div','contact');
+    const wa=el('a','btn sm main','💬 Copy my question & open the group chat');wa.href=CONTACT.group;wa.target='_blank';wa.rel='noopener';
+    wa.onclick=()=>copy(msg,'Your question is copied. Paste it in the group chat.');
+    a.append(wa);f.appendChild(a);c.appendChild(f)}
+  box.appendChild(c)}
+function renderAll(){renderCard('Ask');renderCard('Answer')}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400)}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch(e){toast('Copy is blocked here. Press and hold the sentence to copy it.')}}
+
+/* ---------- controls ---------- */
+ROLES.forEach(r=>$('#legend').appendChild(el('span','r-'+r[0],r[1])));
+const ROLE_INFO={who:['Who is doing it','我 · 你 · 他'],when:['When it happens','周六 · 今天'],where:['Where it happens','在超市 · 在堪培拉'],with:['Who with, or together','和朋友 · 一起'],
+ act:['The action, or what something is like','带 · 来 · 穿 · 喜欢 · 好看'],obj:['The thing or person the action is about','室友 · 鲜花 · 外套'],
+ link:['Small words that join ideas or add detail','的 · 因为 · 而且 · 很'],ask:['Words that make it a question','吗 · 谁 · 什么 · 呢']};
+ROLES.forEach(r=>$('#rlist').appendChild(el('li','',`<span class="r-${r[0]}">${r[1]}</span><div>${ROLE_INFO[r[0]][0]}<br><small>${ROLE_INFO[r[0]][1]}</small></div>`)));
+function start(){state.clear();done.Ask.clear();done.Answer.clear();deck.Ask=[];deck.Answer=[];refill('Ask');refill('Answer');draw('Ask');draw('Answer');
+  if(pending&&pending.kind){const {kind,i}=pending;const p=(kind==='Ask'?ASK:ANS)[i];cur[kind]=i;setup(kind+i,p,false);deck[kind]=deck[kind].filter(x=>x.i!==i)}
+  const target=pending&&pending.kind;pending=null;renderAll();
+  if(target)setTimeout(()=>{const c=$(target==='Ask'?'#ask':'#ans');c.scrollIntoView({behavior:'smooth',block:'start'})},50)}
+function openScene(sc,ch){SC=sc;CH=ch;ASK=ch.ask;ANS=ch.ans;NOUNS=ch.nouns;
+  $('#sTitle').innerHTML=`${sc.emoji} ${sc.title}<span>${sc.intro}</span>`;
+  const C=$('#chapters');C.innerHTML='';
+  sc.chapters.forEach((c,i)=>{const o=isOpen(c);const b=el('button','topic'+(o?' open':'')+(c===ch?' on':''),`<span class="n">Chapter ${i+1}</span><span class="l">${c.emoji} ${c.title}</span><span class="s">${!o?'🔒 Opens '+opensLabel(c):c===ch?'You\'re here':'Open'}</span>`);
+    b.type='button';b.onclick=()=>{if(o)location.hash=sc.id+'-'+c.id+(preview?'-preview':'');else toast(`Opens ${opensLabel(c)}. Drop your words in the WhatsApp group first!`)};C.appendChild(b)});
+  $('#now').innerHTML=`<b>Chapter ${sc.chapters.indexOf(ch)+1} · ${ch.title}</b> ${ch.zh}`;
+  if(preview)$('#now').innerHTML+=`<div class="note">👀 Preview mode: every chapter is open. Learners see locked chapters until their date.</div>`;
+  start()}
+function renderBank(){const B=$('#bank');const ns=CH.nouns.slice().reverse();const today=new Date();
+  const isNew=n=>n[9]&&(today-new Date(n[9]+'T00:00:00'))<2*864e5;
+  B.innerHTML=`<div class="bh"><b>💬 Words from our community</b> <span>${ns.length} so far · add yours in the WhatsApp group</span></div>`;
+  const w=el('div','bwords');ns.forEach(n=>w.appendChild(el('span','bw'+(isNew(n)?' new':''),`<b>${n[0]}</b> ${n[1]} · ${n[2]}<small>from ${n[3]}${isNew(n)?' · <i>New</i>':''}</small>`)));B.appendChild(w)}
+function sceneText(sc){return [sc.title,sc.desc,...sc.chapters.map(c=>c.title+' '+(c.zh||'')),...sc.chapters.filter(isOpen).flatMap(c=>c.ask.concat(c.ans).map(p=>p.en+' '+p.t.join('')))].join(' ').toLowerCase()}
+const norm=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[？。，！?.,!'’]/g,'').replace(/\s+/g,' ').trim();
+function pyOf(seq){return seq.filter(w=>!PUNCT.includes(w)).map(w=>(D[w]||[''])[0]).join(' ')}
+function searchAll(q){const res=[],words=[];const nq=norm(q),nq2=nq.replace(/ /g,'');
+  SCENES.forEach(sc=>sc.chapters.forEach(ch=>{if(!isOpen(ch))return;
+    [['Ask',ch.ask],['Answer',ch.ans]].forEach(([kind,arr])=>arr.forEach((p,i)=>{
+      const zh=p.t.map(w=>w==='N'?'___':w==='P'?'他':w==='M'?'一_':w==='Z'?'这_':w==='C'?'(colour)':w==='V'?'吃/喝':w==='G'?'好吃':w).join('');const py=pyOf(p.t);
+      const hay=[norm(zh),norm(p.en),norm(py),norm(py).replace(/ /g,'')].join(' | ');
+      if(hay.includes(nq)||hay.includes(nq2)||(p.t.includes('N')&&ch.nouns.some(n=>(norm(n[0]+' '+n[1]+' '+n[2])).includes(nq))))res.push({sc,ch,kind,i,p,zh})}));
+    ch.nouns.forEach(n=>{if(norm(n[0]+' '+n[1]+' '+n[2]+' '+n[1].replace(/ /g,'')).includes(nq))words.push({sc,ch,n})})}));
+  return{res,words}}
+function goTo(sc,ch,kind,i){pending={kind,i};const h=sc.id+'-'+ch.id+(preview?'-preview':'');if(location.hash==='#'+h)route();else location.hash=h}
+function renderHome(){const q=$('#search').value.trim().toLowerCase();const S=$('#scenes');S.innerHTML='';const R=$('#results');R.innerHTML='';
+  if(q){const {res,words}=searchAll(q);
+    if(words.length){R.appendChild(el('h3','rh','Words'));const w=el('div','rwords');
+      words.forEach(x=>{const b=el('button','rword',`<b>${x.n[0]}</b> ${x.n[1]} · ${x.n[2]}<small>${x.sc.emoji} ${x.ch.title}</small>`);b.type='button';b.onclick=()=>goTo(x.sc,x.ch);w.appendChild(b)});R.appendChild(w)}
+    if(res.length){R.appendChild(el('h3','rh',`Sentences (${res.length})`));
+      res.slice(0,30).forEach(x=>{const b=el('button','ritem',`<span class="rzh">${x.zh}</span><span class="ren">${x.p.en.replace('{c}','(colour)')}</span><span class="rtag">${x.sc.emoji} ${x.ch.title} · ${x.kind==='Ask'?'Ask it':'Answer it'}</span>`);b.type='button';b.onclick=()=>goTo(x.sc,x.ch,x.kind,x.i);R.appendChild(b)})}
+    if(!res.length&&!words.length)R.appendChild(el('p','empty','Nothing matches that yet. Try another word, in English, Chinese or pinyin.'))}
+  const list=SCENES.filter(sc=>!q||sceneText(sc).includes(q)||searchAll(q).res.some(r=>r.sc===sc));
+  list.forEach(sc=>{const a=el('a','scard');a.href='#'+sc.id;
+    a.innerHTML=`<span class="em">${sc.emoji}</span><h3>${sc.title}</h3><p>${sc.desc}</p><ul>${sc.chapters.map(c=>`<li class="${isOpen(c)?'open':''}">${isOpen(c)?'':'🔒 '}${c.emoji} ${c.title}</li>`).join('')}</ul>`;S.appendChild(a)});
+  if(!q)S.appendChild(el('div','scard soon','<span class="em">✨</span><h3>More scenes coming</h3><p>New scenes are added regularly. Follow @learnese_ to hear when.</p>'));
+  if(q&&!list.length&&!$('#results').children.length)S.appendChild(el('p','empty','No scene matches that yet.'))}
+
+function route(){const h=location.hash.slice(1);
+  const parts=h.split('-');preview=parts.includes('preview');const [sid,cid]=parts;const sc=SCENES.find(x=>x.id===sid);
+  if(!sc){$('#home').hidden=false;$('#scene').hidden=true;renderHome();return}
+  const ch=sc.chapters.find(c=>c.id===cid&&isOpen(c))||sc.chapters.find(isOpen);
+  $('#home').hidden=true;$('#scene').hidden=false;const hadTarget=pending&&pending.kind;if(!hadTarget)scrollTo(0,0);openScene(sc,ch)}
+$('#search').oninput=renderHome;
+addEventListener('hashchange',route);
+function view(e){const zh=$('#szh').checked,py=$('#spy').checked;
+  if(!zh&&!py){e.target.checked=true;return toast('Keep 汉字 or pinyin on, so you can build in Chinese')}
+  document.body.classList.toggle('nozh',!zh);document.body.classList.toggle('nopy',!py);document.body.classList.toggle('noen',!$('#sen').checked)}
+['#szh','#spy','#sen'].forEach(id=>$(id).onchange=view);
+route();
+</script>
+</body></html>
