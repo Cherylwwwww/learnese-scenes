@@ -752,6 +752,18 @@ function view(e){const zh=$('#szh').checked,py=$('#spy').checked;
   if(!zh&&!py){e.target.checked=true;return toast('Keep 汉字 or pinyin on, so you can build in Chinese')}
   document.body.classList.toggle('nozh',!zh);document.body.classList.toggle('nopy',!py);document.body.classList.toggle('noen',!$('#sen').checked)}
 ['#szh','#spy','#sen'].forEach(id=>$(id).onchange=view);
-route();
+/* ---------- words added later: words.json in the same folder ---------- */
+async function loadWords(){
+  try{
+    const r=await fetch('words.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+    const w=await r.json();const today='2026-01-01';
+    SCENES.forEach(sc=>sc.chapters.forEach(ch=>{const list=w[ch.id];if(!Array.isArray(list)||!ch.nouns)return;
+      list.forEach(x=>{if(!x||!x.word||ch.nouns.some(n=>n[0]===x.word))return;
+        const person=ch.id==='who'?1:0;
+        ch.nouns.push([x.word,x.pinyin||'',x.english||'',x.from||'the community',x.he_she_it||(person?'他':'它'),person,x.measure||'个',x.eat_or_drink||'',x.alcohol?'alc':'',today]);
+        if(x.pinyin&&!D[x.word])D[x.word]=[x.pinyin,'obj',x.english||''];})}));
+  }catch(e){}
+}
+loadWords().finally(route);
 </script>
 </body></html>
