@@ -219,7 +219,8 @@ const ROLES=[['who','Who'],['when','When'],['where','Where'],['with','With'],['a
 // people from the group: [zh, pinyin, English, who added it, pronoun, is a person]
 const NOUNS1=[ // words from the community: [zh, pinyin, English, who shared it, pronoun, person?, measure, 吃/喝, alcohol, date added]
  ['室友','shìyǒu','roommate','Cheryl','他',1,'','','','2026-11-08'],['表妹','biǎomèi','younger cousin','Cheryl','她',1,'','','','2026-11-08'],['同事','tóngshì','colleague','Cheryl','她',1,'','','','2026-11-08'],
- ['姐姐','jiějie','older sister','Claudia','她',1,'','','','2026-11-09'],['老公','lǎogōng','husband','Claudia','他',1,'','','','2026-11-09']];
+ ['姐姐','jiějie','older sister','Claudia','她',1,'','','','2026-11-09'],['老公','lǎogōng','husband','Claudia','他',1,'','','','2026-11-09'],
+ ['朋友','péngyou','friend','Cheryl','他',1,'','','','2026-11-15'],['父母','fùmǔ','parents','Cheryl','他们',1,'','','','2026-11-15']];
 
 /* ---------- puzzles ----------
  t: the sentence (N = person from the group, P = 他/她/它 for them; ，。？：are shown, not tiles)
@@ -325,6 +326,7 @@ Object.assign(D,{
  '红色':['hóngsè','obj','red'],'黑色':['hēisè','obj','black'],'白色':['báisè','obj','white'],'绿色':['lǜsè','obj','green'],'蓝色':['lánsè','obj','blue'],'黄色':['huángsè','obj','yellow']
 });
 Object.assign(D,{'外套':['wàitào','obj','jacket'],'衬衫':['chènshān','obj','shirt'],'裙子':['qúnzi','obj','skirt'],'裤子':['kùzi','obj','trousers']});
+D['他们']=['tāmen','who','they'];
 const COLOURS=[['红色','red'],['黑色','black'],['白色','white'],['绿色','green'],['蓝色','blue'],['黄色','yellow']];
 const MWPY={'个':'yí ge','束':'yí shù','瓶':'yì píng','盒':'yì hé','盆':'yì pén','副':'yí fù','件':'yí jiàn','条':'yì tiáo','顶':'yì dǐng','双':'yì shuāng','套':'yí tào','盘':'yì pán','杯':'yì bēi'};
 Object.keys(MWPY).forEach(k=>{D['一'+k]=D['一'+k]||[MWPY[k],'link','one (measure word)'];D['这'+k]=D['这'+k]||['zhè '+MWPY[k].split(' ')[1],'who','this one']});
