@@ -710,7 +710,7 @@ function start(){state.clear();done.Ask.clear();done.Answer.clear();deck.Ask=[];
 function openScene(sc,ch){SC=sc;CH=ch;ASK=ch.ask;ANS=ch.ans;NOUNS=ch.nouns;
   $('#sTitle').innerHTML=`${sc.emoji} ${sc.title}<span>${sc.intro}</span>`;
   const C=$('#chapters');C.innerHTML='';
-  sc.chapters.forEach((c,i)=>{const o=isOpen(c);const b=el('button','topic'+(o?' open':'')+(c===ch?' on':''),`<span class="n">Chapter ${i+1}</span><span class="l">${c.emoji} ${c.title}</span><span class="s">${!o?'🔒 Opens '+opensLabel(c):c===ch?'You\'re here':'Open'}</span>`);
+  sc.chapters.forEach((c,i)=>{const o=isOpen(c);const b=el('button','topic'+(o?' open':'')+(c===ch?' on':''),`<span class="n">Chapter ${i+1}</span><span class="l">${c.emoji} ${c.title}</span><span class="s">${!o?'🔒 Opens '+opensLabel(c):'Open'}</span>`);
     b.type='button';b.onclick=()=>{if(o)location.hash=sc.id+'-'+c.id+(preview?'-preview':'');else toast(`Opens ${opensLabel(c)}. Drop your words in the WhatsApp group first!`)};C.appendChild(b)});
   $('#now').innerHTML=`<b>Chapter ${sc.chapters.indexOf(ch)+1} · ${ch.title}</b> ${ch.zh}`;
   if(preview)$('#now').innerHTML+=`<div class="note">👀 Preview mode: every chapter is open. Learners see locked chapters until their date.</div>`;
